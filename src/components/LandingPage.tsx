@@ -10,7 +10,6 @@ const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const [theme, setTheme] = useState<ThemeType>('dark');
 
-  // Apply theme to body element for global background gradient
   useEffect(() => {
     document.body.className = theme === 'dark' ? '' : 'theme-light';
   }, [theme]);
