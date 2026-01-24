@@ -4,7 +4,7 @@
 
 /* Theme Variables */
 .upload-page-wrapper {
-  --bg-primary: #0a0a0a;
+  --bg-primary: transparent;
   --bg-secondary: rgba(255, 255, 255, 0.05);
   --bg-tertiary: rgba(255, 255, 255, 0.08);
   --text-primary: rgba(255, 255, 255, 0.95);
@@ -12,17 +12,27 @@
   --text-tertiary: rgba(255, 255, 255, 0.7);
   --border-color: rgba(255, 255, 255, 0.1);
   --shadow-color: rgba(0, 0, 0, 0.5);
+  background: transparent;
 }
 
 .upload-page-wrapper.theme-light {
-  --bg-primary: #f8fafc;
-  --bg-secondary: rgba(255, 255, 255, 0.8);
-  --bg-tertiary: rgba(255, 255, 255, 0.9);
-  --text-primary: #1e293b;
-  --text-secondary: #475569;
-  --text-tertiary: #64748b;
-  --border-color: rgba(0, 0, 0, 0.1);
-  --shadow-color: rgba(0, 0, 0, 0.1);
+  --bg-primary: #f5f7fa;
+  --bg-secondary: rgba(255, 250, 245, 0.85);
+  --bg-tertiary: rgba(255, 252, 250, 0.9);
+  --text-primary: #2d3748;
+  --text-secondary: #4a5568;
+  --text-tertiary: #718096;
+  --border-color: rgba(203, 213, 225, 0.6);
+  --shadow-color: rgba(148, 163, 184, 0.15);
+  background: linear-gradient(135deg, 
+    #fef3f2 0%, 
+    #fef7ed 20%, 
+    #f0fdf4 40%, 
+    #eff6ff 60%, 
+    #f5f3ff 80%, 
+    #fef3f2 100%
+  );
+  background-attachment: fixed;
 }
 
 /* Common Glassmorphism Effect */

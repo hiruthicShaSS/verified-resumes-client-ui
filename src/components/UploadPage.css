@@ -4,24 +4,31 @@
 
 /* Page Wrapper - Single Page Layout */
 .upload-page-wrapper {
-  min-height: 100vh;
-  background: var(--bg-primary);
+  min-height: calc(100vh - 120px);
   display: flex;
   flex-direction: column;
   position: relative;
   overflow-x: hidden;
   transition: background-color 0.3s ease;
-  padding: 0;
+  padding: 20px;
+  margin: 60px;
+  border: 3px solid var(--border-color);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px var(--shadow-color), 
+              0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+              0 0 30px rgba(255, 255, 255, 0.03) inset;
+  background: var(--bg-primary);
 }
 
 /* Header Wrapper with Glassmorphism */
 .upload-header-wrapper {
-  background: var(--bg-tertiary);
+  background: transparent;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  border-bottom: 1px solid var(--border-color);
-  box-shadow: 0 4px 16px var(--shadow-color);
+  border-bottom: none;
+  box-shadow: none;
   transition: background-color 0.3s ease, border-color 0.3s ease;
+  border-radius: 12px 12px 0 0;
 }
 
 .upload-header {
@@ -29,6 +36,12 @@
   align-items: center;
   justify-content: space-between;
   padding: 16px 24px;
+  background: var(--bg-tertiary);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 12px 12px 0 0;
+  margin: -20px -20px 0 -20px;
+  padding-top: 20px;
 }
 
 .header-left {
@@ -51,6 +64,14 @@
   transition: all 0.3s ease;
   box-shadow: 0 2px 8px var(--shadow-color);
   margin-right: 12px;
+}
+
+.mobile-theme-toggle {
+  display: none;
+}
+
+.desktop-theme-toggle {
+  display: flex;
 }
 
 .theme-toggle-btn:hover {
@@ -256,13 +277,15 @@
   flex: 1;
   padding: 32px;
   overflow-y: auto;
-  background: var(--bg-primary);
+  background: transparent;
+  min-height: 0; /* Important for flex scrolling */
 }
 
 .upload-content {
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
+  padding: 0 32px;
 }
 
 /* Upload Tab Wrapper */
@@ -270,6 +293,7 @@
   display: flex;
   flex-direction: column;
   gap: 32px;
+  width: 100%;
 }
 
 /* Upload Area Container - Centered */
@@ -278,6 +302,7 @@
   justify-content: center;
   align-items: center;
   min-height: 300px;
+  width: 100%;
 }
 
 /* Upload Area Styles with Glassmorphism - Centered */
@@ -292,8 +317,8 @@
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
   box-shadow: 0 8px 32px var(--shadow-color);
-  max-width: 600px;
   width: 100%;
+  max-width: 100%;
 }
 
 .upload-area:hover {
@@ -326,6 +351,7 @@
 /* File Section Styles */
 .file-section {
   margin-top: 32px;
+  width: 100%;
 }
 
 .file-section-title {
@@ -531,29 +557,45 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .upload-page-wrapper {
-    padding: 10px;
-  }
-
-  .upload-page {
-    min-height: calc(100vh - 20px);
-    border-radius: 16px;
+    padding: 0;
   }
 
   .upload-header {
     flex-direction: column;
-    gap: 16px;
-    padding: 16px;
+    gap: 12px;
+    padding: 12px 16px;
+    margin: -10px -10px 0 -10px;
+    padding-top: 10px;
   }
 
-  .header-left,
-  .header-center,
-  .header-right {
+  /* Top row: Cancel (left) + Theme toggle (right) */
+  .header-left {
     flex: none;
     width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    order: 1;
   }
 
-  .header-right {
-    justify-content: space-between;
+  .header-left .cancel-link {
+    margin: 0;
+  }
+
+  .mobile-theme-toggle {
+    display: flex;
+    margin-right: 0;
+  }
+
+  .desktop-theme-toggle {
+    display: none;
+  }
+
+  /* Tabs in middle */
+  .header-center {
+    flex: none;
+    width: 100%;
+    order: 2;
   }
 
   .tabs-container {
@@ -572,8 +614,48 @@
     display: none;
   }
 
+  /* Bottom row: Back (left) + Next (right) */
+  .header-right {
+    flex: none;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    order: 3;
+  }
+
+  .header-right .theme-toggle-btn {
+    display: none; /* Hide theme toggle from header-right in mobile */
+  }
+
+  .btn-back {
+    flex: 1;
+    order: 1;
+  }
+
+  .btn-next {
+    flex: 1;
+    order: 2;
+  }
+
+  .upload-page-wrapper {
+    height: calc(100vh - 40px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    margin: 20px;
+    padding: 10px;
+  }
+
   .upload-content-wrapper {
     padding: 16px;
+    padding-bottom: 100px;
+    overflow-y: scroll;
+    -webkit-overflow-scrolling: touch;
+    flex: 1;
+    min-height: 0;
+    height: 0; /* Force flex to calculate height */
   }
 
   .upload-content {
@@ -582,6 +664,10 @@
 
   .upload-area {
     padding: 48px 24px;
+  }
+
+  .file-section {
+    margin-top: 24px;
   }
 }
 

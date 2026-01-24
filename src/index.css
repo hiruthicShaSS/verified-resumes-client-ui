@@ -2,6 +2,10 @@
   box-sizing: border-box;
 }
 
+html {
+  height: 100%;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
@@ -9,7 +13,31 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #ffffff;
+  background: linear-gradient(135deg, 
+    #000000 0%, 
+    #0a0e27 15%, 
+    #1a1f3a 30%, 
+    #0f172a 45%, 
+    #1e293b 60%, 
+    #0f172a 75%, 
+    #1a1f3a 90%, 
+    #000000 100%
+  );
+  background-attachment: fixed;
+  background-size: cover;
+  min-height: 100vh;
+}
+
+body.theme-light {
+  background: linear-gradient(135deg, 
+    #fef3f2 0%, 
+    #fef7ed 20%, 
+    #f0fdf4 40%, 
+    #eff6ff 60%, 
+    #f5f3ff 80%, 
+    #fef3f2 100%
+  );
+  background-attachment: fixed;
 }
 
 code {
@@ -19,4 +47,9 @@ code {
 
 #root {
   min-height: 100vh;
+  background: transparent;
+}
+
+.App {
+  background: transparent;
 }
