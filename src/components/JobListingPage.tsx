@@ -45,18 +45,26 @@ const JobListingPage: React.FC = () => {
   };
 
   useEffect(() => {
-    // Load posted jobs on mount
+    // Load ALL posted jobs on mount - visible to all users
     const postedJobs = JSON.parse(localStorage.getItem('postedJobs') || '[]');
     if (postedJobs.length > 0) {
-      const transformedJobs: Job[] = postedJobs.map((job: any) => ({
+      // Sort by posted date (newest first)
+      const sortedJobs = [...postedJobs].sort((a: any, b: any) => {
+        const dateA = new Date(a.postedDate || 0).getTime();
+        const dateB = new Date(b.postedDate || 0).getTime();
+        return dateB - dateA;
+      });
+      
+      const transformedJobs: Job[] = sortedJobs.map((job: any) => ({
         id: job.id || Math.random().toString(),
         title: job.role || 'Untitled Position',
-        company: job.company || 'Company',
+        company: job.company || job.companyName || 'Company',
         location: job.location || 'Location',
         type: job.type || 'Full-time',
         postedDate: job.postedDate ? formatDate(job.postedDate) : 'Recently posted',
         description: `${job.aboutJob || ''}\n\nCompany Overview:\n${job.companyOverview || ''}\n\nJob Description:\n${job.jobDescription || ''}\n\nPreferred Qualifications:\n${job.preferredQualifications || ''}\n\nMinimum Qualifications:\n${job.minimumQualifications || ''}`,
-        salary: job.salary
+        salary: job.salary,
+        postedBy: job.postedBy || 'Anonymous'
       }));
       setJobs(transformedJobs);
       if (transformedJobs.length > 0) {
@@ -87,17 +95,25 @@ const JobListingPage: React.FC = () => {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // Load posted jobs from localStorage
+    // Load ALL posted jobs from localStorage - visible to all users
     const postedJobs = JSON.parse(localStorage.getItem('postedJobs') || '[]');
     
+    // Sort by posted date (newest first)
+    const sortedJobs = [...postedJobs].sort((a: any, b: any) => {
+      const dateA = new Date(a.postedDate || 0).getTime();
+      const dateB = new Date(b.postedDate || 0).getTime();
+      return dateB - dateA;
+    });
+    
     // Filter jobs based on search criteria
-    let filteredJobs = postedJobs;
+    let filteredJobs = sortedJobs;
     
     if (searchQuery.trim() || location.trim()) {
-      filteredJobs = postedJobs.filter((job: any) => {
+      filteredJobs = sortedJobs.filter((job: any) => {
         const matchesQuery = !searchQuery.trim() || 
           job.role?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          job.company?.toLowerCase().includes(searchQuery.toLowerCase());
+          job.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          job.companyName?.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesLocation = !location.trim() ||
           job.location?.toLowerCase().includes(location.toLowerCase());
         return matchesQuery && matchesLocation;
