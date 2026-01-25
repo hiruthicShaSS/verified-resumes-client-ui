@@ -29,16 +29,6 @@ const Header: React.FC<HeaderProps> = ({ showLogout = true, title, onBack }) => 
 
   return (
     <>
-      {/* Logout button - absolutely positioned top-left */}
-      {showLogout && user && (
-        <button 
-          className="logout-btn-top-left" 
-          onClick={handleLogout}
-        >
-          Logout
-        </button>
-      )}
-      
       <header className="app-header">
         <div className="header-left">
           {onBack && (
@@ -47,6 +37,14 @@ const Header: React.FC<HeaderProps> = ({ showLogout = true, title, onBack }) => 
             </button>
           )}
           {title && <h1 className="header-title">{title}</h1>}
+          {showLogout && user && (
+            <button 
+              className="logout-btn-header" 
+              onClick={handleLogout}
+            >
+              Logout
+            </button>
+          )}
         </div>
         
         <div className="header-right">

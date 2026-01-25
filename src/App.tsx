@@ -9,6 +9,7 @@ import UploadPage from './components/UploadPage.tsx';
 import JobListingPage from './components/JobListingPage.tsx';
 import PostJobPage from './components/PostJobPage.tsx';
 import ApplyJobPage from './components/ApplyJobPage.tsx';
+import TeamManagementPage from './components/TeamManagementPage.tsx';
 import ProtectedRoute from './components/ProtectedRoute.tsx';
 import Ghost from './components/Ghost.tsx';
 
@@ -57,6 +58,14 @@ const App: React.FC = () => {
                 element={
                   <ProtectedRoute>
                     <ApplyJobPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/team" 
+                element={
+                  <ProtectedRoute>
+                    <TeamManagementPage />
                   </ProtectedRoute>
                 } 
               />

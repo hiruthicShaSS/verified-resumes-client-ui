@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { signInWithPopup, onAuthStateChanged } from 'firebase/auth';
 import { auth, googleProvider } from '../firebase/config.ts';
 import { useTheme } from '../contexts/ThemeContext.tsx';
+import AdminRegistrationModal from './AdminRegistrationModal.tsx';
+import HRRegistrationModal from './HRRegistrationModal.tsx';
 import './common.css';
 import './LoginPage.css';
 import { SunIcon, MoonIcon } from './Icons.tsx';
@@ -12,6 +14,8 @@ const LoginPage: React.FC = () => {
   const { theme, toggleTheme } = useTheme();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
+  const [showAdminModal, setShowAdminModal] = useState(false);
+  const [showHRModal, setShowHRModal] = useState(false);
 
   useEffect(() => {
     // Check if user is already logged in via Firebase
@@ -120,6 +124,22 @@ const LoginPage: React.FC = () => {
                     <span className="error-message">{error}</span>
                   </div>
                 )}
+                <div className="registration-links">
+                  <button 
+                    className="admin-register-link-btn" 
+                    onClick={() => setShowAdminModal(true)}
+                    type="button"
+                  >
+                    👑 Register Admin
+                  </button>
+                  <button 
+                    className="hr-register-link-btn" 
+                    onClick={() => setShowHRModal(true)}
+                    type="button"
+                  >
+                    👔 Register HR
+                  </button>
+                </div>
               </>
             )}
           </div>
@@ -130,6 +150,13 @@ const LoginPage: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {showAdminModal && (
+        <AdminRegistrationModal onClose={() => setShowAdminModal(false)} />
+      )}
+      {showHRModal && (
+        <HRRegistrationModal onClose={() => setShowHRModal(false)} />
+      )}
     </div>
   );
 };

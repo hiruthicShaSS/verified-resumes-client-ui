@@ -1,13 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext.tsx';
 import Header from './Header.tsx';
+import AdminRegistrationModal from './AdminRegistrationModal.tsx';
+import HRRegistrationModal from './HRRegistrationModal.tsx';
 import './common.css';
 import './LandingPage.css';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const [showAdminModal, setShowAdminModal] = useState(false);
+  const [showHRModal, setShowHRModal] = useState(false);
 
   const handleGetStarted = () => {
     navigate('/upload');
@@ -69,13 +73,47 @@ const LandingPage: React.FC = () => {
         </div>
       </div>
 
+      {/* Left Sidebar Buttons */}
+      <div className="left-sidebar-buttons">
+        <button 
+          className="team-btn" 
+          onClick={() => navigate('/team')}
+          title="Manage Team"
+        >
+          👥 Team
+        </button>
+        <button 
+          className="admin-register-btn" 
+          onClick={() => setShowAdminModal(true)}
+          title="Register as CEO/Admin"
+        >
+          👑 Register Admin
+        </button>
+        <button 
+          className="hr-register-btn" 
+          onClick={() => setShowHRModal(true)}
+          title="Register as HR"
+        >
+          👔 Register HR
+        </button>
+      </div>
+
       <div className="landing-content">
         <h1 className="landing-title">Verified Resumes</h1>
         <p className="landing-subtitle">Upload and verify your resume files</p>
-        <button className="get-started-btn" onClick={handleGetStarted}>
-          Get Started
-        </button>
+        <div className="landing-buttons">
+          <button className="get-started-btn" onClick={handleGetStarted}>
+            Get Started
+          </button>
+        </div>
       </div>
+
+      {showAdminModal && (
+        <AdminRegistrationModal onClose={() => setShowAdminModal(false)} />
+      )}
+      {showHRModal && (
+        <HRRegistrationModal onClose={() => setShowHRModal(false)} />
+      )}
     </div>
   );
 };
