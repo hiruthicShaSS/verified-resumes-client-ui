@@ -4,14 +4,27 @@
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 2000;
   padding: 20px;
+}
+
+.theme-dark .profile-modal-overlay,
+.profile-modal-overlay:not(.theme-light) {
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
+}
+
+.theme-light .profile-modal-overlay {
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
 }
 
 .profile-modal-content {
@@ -51,6 +64,11 @@
   color: rgba(255, 255, 255, 0.95);
 }
 
+.theme-dark .profile-modal-header h2,
+.profile-modal-overlay:not(.theme-light) .profile-modal-header h2 {
+  color: rgba(255, 255, 255, 0.95);
+}
+
 .theme-light .profile-modal-header h2 {
   color: #2d3748;
 }
@@ -58,7 +76,7 @@
 .close-btn {
   background: transparent;
   border: none;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 32px;
   cursor: pointer;
   padding: 0;
@@ -70,6 +88,11 @@
   border-radius: 50%;
   transition: all 0.3s ease;
   line-height: 1;
+}
+
+.theme-dark .close-btn,
+.profile-modal-overlay:not(.theme-light) .close-btn {
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .theme-light .close-btn {
@@ -102,7 +125,12 @@
 .profile-email {
   margin: 0;
   font-size: 14px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.theme-dark .profile-email,
+.profile-modal-overlay:not(.theme-light) .profile-email {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .theme-light .profile-email {
@@ -121,8 +149,13 @@
   display: block;
   font-size: 14px;
   font-weight: 500;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
   margin-bottom: 8px;
+}
+
+.theme-dark .form-label,
+.profile-modal-overlay:not(.theme-light) .form-label {
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .theme-light .form-label {
@@ -142,11 +175,30 @@
   transition: all 0.3s ease;
 }
 
+.theme-dark .form-input,
+.theme-dark .form-textarea,
+.profile-modal-overlay:not(.theme-light) .form-input,
+.profile-modal-overlay:not(.theme-light) .form-textarea {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.95);
+}
+
 .theme-light .form-input,
 .theme-light .form-textarea {
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(203, 213, 225, 0.5);
   color: #2d3748;
+}
+
+.theme-dark .form-input:focus,
+.theme-dark .form-textarea:focus,
+.profile-modal-overlay:not(.theme-light) .form-input:focus,
+.profile-modal-overlay:not(.theme-light) .form-textarea:focus {
+  outline: none;
+  border-color: rgba(59, 130, 246, 0.5);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .form-input:focus,
@@ -172,11 +224,18 @@
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 8px;
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.95);
   font-size: 14px;
   min-height: 44px;
   display: flex;
   align-items: center;
+}
+
+.theme-dark .form-display,
+.profile-modal-overlay:not(.theme-light) .form-display {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .theme-light .form-display {
@@ -200,6 +259,11 @@
   font-weight: 600;
   color: rgba(255, 255, 255, 0.95);
   margin: 0 0 16px 0;
+}
+
+.theme-dark .insights-title,
+.profile-modal-overlay:not(.theme-light) .insights-title {
+  color: rgba(255, 255, 255, 0.95);
 }
 
 .theme-light .insights-title {
@@ -227,10 +291,15 @@
 
 .insight-label {
   font-size: 12px;
-  color: rgba(255, 255, 255, 0.7);
+  color: rgba(255, 255, 255, 0.85);
   margin-bottom: 8px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.theme-dark .insight-label,
+.profile-modal-overlay:not(.theme-light) .insight-label {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .theme-light .insight-label {
@@ -240,6 +309,11 @@
 .insight-value {
   font-size: 24px;
   font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+}
+
+.theme-dark .insight-value,
+.profile-modal-overlay:not(.theme-light) .insight-value {
   color: rgba(255, 255, 255, 0.95);
 }
 
@@ -287,7 +361,14 @@
 
 .cancel-btn {
   background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.theme-dark .cancel-btn,
+.profile-modal-overlay:not(.theme-light) .cancel-btn {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(255, 255, 255, 0.2);
 }
 

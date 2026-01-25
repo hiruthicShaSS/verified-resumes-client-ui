@@ -1,12 +1,32 @@
 .landing-page {
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   padding: 20px;
   position: relative;
   background: #000000;
   background-attachment: fixed;
+}
+
+.landing-page .app-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 20px;
+  pointer-events: none;
+}
+
+.landing-page .app-header > * {
+  pointer-events: auto;
+}
+
+.landing-page .header-right {
+  position: fixed;
+  top: 20px;
+  right: 20px;
 }
 
 .landing-theme-toggle {

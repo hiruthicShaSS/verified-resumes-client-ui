@@ -40,7 +40,10 @@ const PostJobPage: React.FC = () => {
   };
 
   const handleSave = () => {
-    // Save to localStorage (in real app, this would go to API)
+    // Get current user info
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+    
+    // Save to localStorage - jobs are visible to ALL users
     const existingJobs = JSON.parse(localStorage.getItem('postedJobs') || '[]');
     const newJob = {
       id: Date.now().toString(),
@@ -48,12 +51,14 @@ const PostJobPage: React.FC = () => {
       postedDate: new Date().toISOString(),
       company: formData.companyName || 'Company',
       location: 'Location', // This would come from form
-      type: 'Full-time' // This would come from form
+      type: 'Full-time', // This would come from form
+      postedBy: userData.name || userData.email || 'Anonymous', // Track who posted it
+      postedByEmail: userData.email || ''
     };
     existingJobs.push(newJob);
     localStorage.setItem('postedJobs', JSON.stringify(existingJobs));
     
-    setToast({ message: 'Job posted successfully!', type: 'success' });
+    setToast({ message: 'Job posted successfully! It will be visible to all users.', type: 'success' });
     setTimeout(() => {
       navigate('/job-listings');
     }, 1500);
