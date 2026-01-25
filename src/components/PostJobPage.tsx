@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext.tsx';
+import Header from './Header.tsx';
 import './common.css';
 import './PostJobPage.css';
-import { SunIcon, MoonIcon } from './Icons.tsx';
 import Toast from './Toast.tsx';
-
-type ThemeType = 'dark' | 'light';
 
 interface JobPostData {
   companyName: string;
@@ -19,7 +18,7 @@ interface JobPostData {
 
 const PostJobPage: React.FC = () => {
   const navigate = useNavigate();
-  const [theme, setTheme] = useState<ThemeType>('dark');
+  const { theme } = useTheme();
   const [formData, setFormData] = useState<JobPostData>({
     companyName: '',
     role: '',
@@ -31,13 +30,6 @@ const PostJobPage: React.FC = () => {
   });
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
-  useEffect(() => {
-    document.body.className = theme === 'dark' ? '' : 'theme-light';
-  }, [theme]);
-
-  const toggleTheme = (): void => {
-    setTheme(prevTheme => prevTheme === 'dark' ? 'light' : 'dark');
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -91,30 +83,15 @@ const PostJobPage: React.FC = () => {
       <header className="post-job-header-wrapper">
         <div className="post-job-header">
           <div className="header-left">
-            <button className="cancel-link" onClick={() => navigate('/')}>
+            <button className="cancel-link" onClick={() => navigate('/home')}>
               Cancel
-            </button>
-            <button 
-              className="theme-toggle-btn mobile-theme-toggle" 
-              onClick={toggleTheme} 
-              aria-label="Toggle theme"
-              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {theme === 'dark' ? <SunIcon size={20} /> : <MoonIcon size={20} />}
             </button>
           </div>
           <div className="header-center">
             <h1 className="page-title">Post a Job</h1>
           </div>
           <div className="header-right">
-            <button 
-              className="theme-toggle-btn desktop-theme-toggle" 
-              onClick={toggleTheme} 
-              aria-label="Toggle theme"
-              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {theme === 'dark' ? <SunIcon size={20} /> : <MoonIcon size={20} />}
-            </button>
+            <Header showLogout={false} />
             <button 
               className="save-btn" 
               onClick={handleSave}

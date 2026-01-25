@@ -1,10 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext.tsx';
+import Header from './Header.tsx';
 import './common.css';
 import './UploadPage.css';
 import InformationTab from './InformationTab.tsx';
 import SummaryTab from './SummaryTab.tsx';
-import { UploadIcon, FileIcon, RemoveIcon, SunIcon, MoonIcon } from './Icons.tsx';
+import { UploadIcon, FileIcon, RemoveIcon } from './Icons.tsx';
 import Toast from './Toast.tsx';
 
 interface UploadedFile {
@@ -19,24 +21,14 @@ interface UploadedFile {
 }
 
 type TabType = 'informations' | 'upload' | 'summary';
-type ThemeType = 'dark' | 'light';
 
 const UploadPage: React.FC = () => {
   const navigate = useNavigate();
+  const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState<TabType>('upload');
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
-  const [theme, setTheme] = useState<ThemeType>('dark');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  // Apply theme to body element for global background gradient
-  useEffect(() => {
-    document.body.className = theme === 'dark' ? '' : 'theme-light';
-  }, [theme]);
-
-  const toggleTheme = (): void => {
-    setTheme(prevTheme => prevTheme === 'dark' ? 'light' : 'dark');
-  };
 
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>): void => {
     e.preventDefault();
@@ -163,15 +155,7 @@ const UploadPage: React.FC = () => {
       <header className="upload-header-wrapper">
         <div className="upload-header">
             <div className="header-left">
-              <button className="cancel-link" onClick={() => navigate('/')}>Cancel</button>
-              <button 
-                className="theme-toggle-btn mobile-theme-toggle" 
-                onClick={toggleTheme} 
-                aria-label="Toggle theme"
-                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              >
-                {theme === 'dark' ? <SunIcon size={20} /> : <MoonIcon size={20} />}
-              </button>
+              <button className="cancel-link" onClick={() => navigate('/home')}>Cancel</button>
             </div>
             <div className="header-center">
               <div className="tabs-container">
@@ -207,14 +191,7 @@ const UploadPage: React.FC = () => {
               </div>
             </div>
             <div className="header-right">
-              <button 
-                className="theme-toggle-btn desktop-theme-toggle" 
-                onClick={toggleTheme} 
-                aria-label="Toggle theme"
-                title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-              >
-                {theme === 'dark' ? <SunIcon size={20} /> : <MoonIcon size={20} />}
-              </button>
+              <Header showLogout={false} />
               <button 
                 className="btn-back" 
                 onClick={handleBack}

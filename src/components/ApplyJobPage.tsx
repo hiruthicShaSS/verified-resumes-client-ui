@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext.tsx';
+import Header from './Header.tsx';
 import './common.css';
 import './ApplyJobPage.css';
-import { SunIcon, MoonIcon, UploadIcon, FileIcon } from './Icons.tsx';
+import { UploadIcon, FileIcon } from './Icons.tsx';
 import Toast from './Toast.tsx';
-
-type ThemeType = 'dark' | 'light';
 
 interface ApplicationData {
   name: string;
@@ -20,7 +20,7 @@ interface ApplicationData {
 const ApplyJobPage: React.FC = () => {
   const navigate = useNavigate();
   const { jobId } = useParams<{ jobId: string }>();
-  const [theme, setTheme] = useState<ThemeType>('dark');
+  const { theme } = useTheme();
   const [formData, setFormData] = useState<ApplicationData>({
     name: '',
     yearsOfExperience: '',
@@ -34,15 +34,10 @@ const ApplyJobPage: React.FC = () => {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   useEffect(() => {
-    document.body.className = theme === 'dark' ? '' : 'theme-light';
     // Load uploaded resumes from localStorage
     const savedFiles = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
     setUploadedResumes(savedFiles);
-  }, [theme]);
-
-  const toggleTheme = (): void => {
-    setTheme(prevTheme => prevTheme === 'dark' ? 'light' : 'dark');
-  };
+  }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -111,27 +106,12 @@ const ApplyJobPage: React.FC = () => {
             <button className="cancel-link" onClick={() => navigate('/job-listings')}>
               Cancel
             </button>
-            <button 
-              className="theme-toggle-btn mobile-theme-toggle" 
-              onClick={toggleTheme} 
-              aria-label="Toggle theme"
-              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {theme === 'dark' ? <SunIcon size={20} /> : <MoonIcon size={20} />}
-            </button>
           </div>
           <div className="header-center">
             <h1 className="page-title">Apply for Job</h1>
           </div>
           <div className="header-right">
-            <button 
-              className="theme-toggle-btn desktop-theme-toggle" 
-              onClick={toggleTheme} 
-              aria-label="Toggle theme"
-              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {theme === 'dark' ? <SunIcon size={20} /> : <MoonIcon size={20} />}
-            </button>
+            <Header showLogout={false} />
           </div>
         </div>
       </header>
