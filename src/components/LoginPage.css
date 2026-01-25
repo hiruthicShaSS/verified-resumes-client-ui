@@ -1,0 +1,427 @@
+/* ============================================
+   LOGIN PAGE - ID BADGE STYLE
+   ============================================ */
+
+.login-page-wrapper {
+  --bg-primary: #000000;
+  --bg-secondary: rgba(255, 255, 255, 0.05);
+  --bg-tertiary: rgba(255, 255, 255, 0.08);
+  --text-primary: rgba(255, 255, 255, 0.95);
+  --text-secondary: rgba(255, 255, 255, 0.8);
+  --text-tertiary: rgba(255, 255, 255, 0.7);
+  --border-color: rgba(255, 255, 255, 0.1);
+  --shadow-color: rgba(0, 0, 0, 0.5);
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  position: relative;
+  background: var(--bg-primary);
+  background-attachment: fixed;
+  overflow: hidden;
+}
+
+.login-page-wrapper.theme-light {
+  --bg-primary: #f5f7fa;
+  --bg-secondary: rgba(255, 250, 245, 0.85);
+  --bg-tertiary: rgba(255, 252, 250, 0.9);
+  --text-primary: #2d3748;
+  --text-secondary: #4a5568;
+  --text-tertiary: #718096;
+  --border-color: rgba(203, 213, 225, 0.6);
+  --shadow-color: rgba(148, 163, 184, 0.15);
+  background: linear-gradient(135deg,
+      #fef3f2 0%,
+      #fef7ed 20%,
+      #f0fdf4 40%,
+      #eff6ff 60%,
+      #f5f3ff 80%,
+      #fef3f2 100%);
+  background-attachment: fixed;
+}
+
+/* Theme Toggle */
+.login-theme-toggle {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.95);
+  cursor: pointer;
+  padding: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  z-index: 10;
+  min-width: 40px;
+  min-height: 40px;
+}
+
+.login-page-wrapper.theme-light .login-theme-toggle {
+  background: rgba(45, 55, 72, 0.1);
+  border: 1px solid rgba(45, 55, 72, 0.2);
+  color: #2d3748;
+}
+
+.login-theme-toggle:hover {
+  background: var(--bg-secondary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+/* Background Pattern */
+.login-background-pattern {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 10px,
+      rgba(255, 255, 255, 0.02) 10px,
+      rgba(255, 255, 255, 0.02) 20px
+    );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ID Badge Container */
+.id-badge-container {
+  position: relative;
+  z-index: 1;
+  perspective: 1000px;
+}
+
+.id-badge {
+  background: var(--bg-secondary);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 16px;
+  border: 2px solid var(--border-color);
+  box-shadow: 
+    0 20px 60px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(255, 255, 255, 0.05) inset,
+    0 1px 0 rgba(255, 255, 255, 0.1) inset;
+  padding: 0;
+  width: 420px;
+  max-width: 100%;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.id-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 25px 70px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.1) inset,
+    0 1px 0 rgba(255, 255, 255, 0.15) inset;
+}
+
+/* Badge Header */
+.badge-header {
+  display: flex;
+  align-items: center;
+  padding: 32px 32px 24px;
+  gap: 20px;
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(16, 185, 129, 0.1) 100%);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.badge-logo {
+  flex-shrink: 0;
+}
+
+.logo-circle {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #3b82f6 0%, #10b981 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+.logo-text {
+  font-size: 24px;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 1px;
+}
+
+.badge-title {
+  flex: 1;
+}
+
+.company-name {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin: 0 0 4px 0;
+  letter-spacing: -0.5px;
+}
+
+.company-tagline {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+/* Badge Divider */
+.badge-divider {
+  height: 3px;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(59, 130, 246, 0.5) 20%, 
+    rgba(16, 185, 129, 0.5) 50%, 
+    rgba(59, 130, 246, 0.5) 80%, 
+    transparent 100%);
+  margin: 0;
+}
+
+/* Badge Content */
+.badge-content {
+  padding: 40px 32px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+}
+
+.badge-icon-section {
+  display: flex;
+  justify-content: center;
+}
+
+.badge-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: var(--bg-tertiary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--border-color);
+  color: var(--text-primary);
+  box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.badge-info-section {
+  text-align: center;
+}
+
+.badge-welcome {
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+}
+
+.badge-instruction {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin: 0;
+  line-height: 1.6;
+  max-width: 320px;
+}
+
+/* Badge Footer */
+.badge-footer {
+  padding: 24px 32px 32px;
+  display: flex;
+  justify-content: center;
+  border-top: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.login-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--text-primary);
+  font-size: 16px;
+}
+
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--border-color);
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.login-error {
+  margin-top: 16px;
+  padding: 12px 16px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #ef4444;
+  font-size: 14px;
+  text-align: left;
+}
+
+.error-icon {
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.error-message {
+  flex: 1;
+  line-height: 1.5;
+}
+
+.config-warning {
+  margin-top: 16px;
+  padding: 12px;
+  background: rgba(251, 191, 36, 0.1);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.config-warning p {
+  margin: 4px 0;
+  color: #fbbf24;
+  font-size: 13px;
+}
+
+.config-hint {
+  font-size: 11px !important;
+  opacity: 0.8;
+}
+
+/* Badge Bottom Border */
+.badge-bottom-border {
+  height: 4px;
+  background: linear-gradient(90deg, 
+    #3b82f6 0%, 
+    #10b981 50%, 
+    #3b82f6 100%);
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+/* Google Sign In Button */
+.google-sign-in-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 24px;
+  background: #fff;
+  color: #3c4043;
+  border: 1px solid #dadce0;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.google-sign-in-btn:hover:not(:disabled) {
+  background: #f8f9fa;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-1px);
+}
+
+.google-sign-in-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.google-sign-in-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.google-icon {
+  flex-shrink: 0;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .id-badge {
+    width: 100%;
+    max-width: 380px;
+  }
+
+  .badge-header {
+    padding: 24px 24px 20px;
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .badge-content {
+    padding: 32px 24px;
+  }
+
+  .badge-footer {
+    padding: 20px 24px 24px;
+  }
+
+  .company-name {
+    font-size: 20px;
+  }
+
+  .badge-welcome {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 480px) {
+  .id-badge {
+    border-radius: 12px;
+  }
+
+  .badge-header {
+    padding: 20px 20px 16px;
+  }
+
+  .badge-content {
+    padding: 24px 20px;
+  }
+
+  .badge-footer {
+    padding: 16px 20px 20px;
+  }
+
+  .logo-circle {
+    width: 56px;
+    height: 56px;
+  }
+
+  .logo-text {
+    font-size: 20px;
+  }
+}
+
