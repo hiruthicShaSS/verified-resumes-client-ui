@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext.tsx';
+import Header from './Header.tsx';
 import './common.css';
 import './JobListingPage.css';
-import { SunIcon, MoonIcon } from './Icons.tsx';
 import Toast from './Toast.tsx';
 
-type ThemeType = 'dark' | 'light';
 type TabType = 'search' | 'saved' | 'applied';
 
 interface Job {
@@ -21,7 +21,7 @@ interface Job {
 
 const JobListingPage: React.FC = () => {
   const navigate = useNavigate();
-  const [theme, setTheme] = useState<ThemeType>('dark');
+  const { theme } = useTheme();
   const [activeTab, setActiveTab] = useState<TabType>('search');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [location, setLocation] = useState<string>('');
@@ -45,10 +45,6 @@ const JobListingPage: React.FC = () => {
   };
 
   useEffect(() => {
-    document.body.className = theme === 'dark' ? '' : 'theme-light';
-  }, [theme]);
-
-  useEffect(() => {
     // Load posted jobs on mount
     const postedJobs = JSON.parse(localStorage.getItem('postedJobs') || '[]');
     if (postedJobs.length > 0) {
@@ -69,10 +65,6 @@ const JobListingPage: React.FC = () => {
       }
     }
   }, []);
-
-  const toggleTheme = (): void => {
-    setTheme(prevTheme => prevTheme === 'dark' ? 'light' : 'dark');
-  };
 
   const tabs: TabType[] = ['search', 'saved', 'applied'];
 
@@ -163,16 +155,8 @@ const JobListingPage: React.FC = () => {
       <header className="job-listing-header-wrapper">
         <div className="job-listing-header">
           <div className="header-left">
-            <button className="cancel-link" onClick={() => navigate('/')}>
+            <button className="cancel-link" onClick={() => navigate('/home')}>
               Cancel
-            </button>
-            <button 
-              className="theme-toggle-btn mobile-theme-toggle" 
-              onClick={toggleTheme} 
-              aria-label="Toggle theme"
-              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {theme === 'dark' ? <SunIcon size={20} /> : <MoonIcon size={20} />}
             </button>
           </div>
           <div className="header-center">
@@ -205,14 +189,7 @@ const JobListingPage: React.FC = () => {
             </div>
           </div>
           <div className="header-right">
-            <button 
-              className="theme-toggle-btn desktop-theme-toggle" 
-              onClick={toggleTheme} 
-              aria-label="Toggle theme"
-              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-            >
-              {theme === 'dark' ? <SunIcon size={20} /> : <MoonIcon size={20} />}
-            </button>
+            <Header showLogout={false} />
             <button 
               className="btn-back" 
               onClick={handleBack}

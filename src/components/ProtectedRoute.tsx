@@ -1,42 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { onAuthStateChanged } from 'firebase/auth';
-import { auth } from '../firebase/config.ts';
+import { useAuth } from '../contexts/AuthContext.tsx';
 
 interface ProtectedRouteProps {
   children: React.ReactElement;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user, loading } = useAuth();
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        // Update localStorage with current user data
-        const userInfo = {
-          name: user.displayName || '',
-          email: user.email || '',
-          picture: user.photoURL || '',
-          uid: user.uid,
-          loginTime: new Date().toISOString()
-        };
-        localStorage.setItem('userData', JSON.stringify(userInfo));
-        localStorage.setItem('isAuthenticated', 'true');
-        setIsAuthenticated(true);
-      } else {
-        localStorage.removeItem('userData');
-        localStorage.removeItem('isAuthenticated');
-        setIsAuthenticated(false);
-      }
-      setIsLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  if (isLoading) {
+  if (loading) {
     return (
       <div style={{ 
         display: 'flex', 
@@ -62,7 +35,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
     );
   }
 
-  if (!isAuthenticated) {
+  if (!user) {
     return <Navigate to="/" replace />;
   }
 

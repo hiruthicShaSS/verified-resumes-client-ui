@@ -1,22 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTheme } from '../contexts/ThemeContext.tsx';
+import Header from './Header.tsx';
 import './common.css';
 import './LandingPage.css';
-import { SunIcon, MoonIcon } from './Icons.tsx';
-
-type ThemeType = 'dark' | 'light';
 
 const LandingPage: React.FC = () => {
   const navigate = useNavigate();
-  const [theme, setTheme] = useState<ThemeType>('dark');
-
-  useEffect(() => {
-    document.body.className = theme === 'dark' ? '' : 'theme-light';
-  }, [theme]);
-
-  const toggleTheme = (): void => {
-    setTheme(prevTheme => prevTheme === 'dark' ? 'light' : 'dark');
-  };
+  const { theme } = useTheme();
 
   const handleGetStarted = () => {
     navigate('/upload');
@@ -24,14 +15,7 @@ const LandingPage: React.FC = () => {
 
   return (
     <div className={`landing-page theme-${theme}`}>
-      <button 
-        className="landing-theme-toggle" 
-        onClick={toggleTheme} 
-        aria-label="Toggle theme"
-        title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-      >
-        {theme === 'dark' ? <SunIcon size={20} /> : <MoonIcon size={20} />}
-      </button>
+      <Header />
 
       {/* Hanging Job Listings Badge */}
       <div className="badge-container" onClick={() => navigate('/job-listings')}>
