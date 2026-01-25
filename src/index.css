@@ -13,16 +13,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: linear-gradient(135deg, 
-    #000000 0%, 
-    #0a0e27 15%, 
-    #1a1f3a 30%, 
-    #0f172a 45%, 
-    #1e293b 60%, 
-    #0f172a 75%, 
-    #1a1f3a 90%, 
-    #000000 100%
-  );
+  background: #000000;
   background-attachment: fixed;
   background-size: cover;
   min-height: 100vh;

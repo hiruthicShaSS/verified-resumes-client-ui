@@ -5,6 +5,7 @@ import './UploadPage.css';
 import InformationTab from './InformationTab.tsx';
 import SummaryTab from './SummaryTab.tsx';
 import { UploadIcon, FileIcon, RemoveIcon, SunIcon, MoonIcon } from './Icons.tsx';
+import Toast from './Toast.tsx';
 
 interface UploadedFile {
   id: number;
@@ -25,6 +26,7 @@ const UploadPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('upload');
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const [theme, setTheme] = useState<ThemeType>('dark');
+  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Apply theme to body element for global background gradient
@@ -65,7 +67,7 @@ const UploadPage: React.FC = () => {
     // Check if adding these files would exceed the limit of 3
     const remainingSlots = 3 - uploadedFiles.length;
     if (remainingSlots <= 0) {
-      alert('Maximum 3 files allowed. Please remove a file before uploading a new one.');
+      setToast({ message: 'Maximum 3 files allowed. Please remove a file before uploading a new one.', type: 'error' });
       return;
     }
 
@@ -88,16 +90,36 @@ const UploadPage: React.FC = () => {
         progress: 100,
         file: file
       }));
-      setUploadedFiles([...uploadedFiles, ...newFiles]);
+      const updatedFiles = [...uploadedFiles, ...newFiles];
+      setUploadedFiles(updatedFiles);
+      
+      // Save to localStorage for use in application form
+      const filesToSave = updatedFiles.map(f => ({
+        id: f.id,
+        name: f.name,
+        type: f.type,
+        size: f.size
+      }));
+      localStorage.setItem('uploadedFiles', JSON.stringify(filesToSave));
       
       if (validFiles.length > remainingSlots) {
-        alert(`Only ${remainingSlots} file(s) uploaded. Maximum 3 files allowed.`);
+        setToast({ message: `Only ${remainingSlots} file(s) uploaded. Maximum 3 files allowed.`, type: 'info' });
       }
     }
   };
 
   const handleRemoveFile = (id: number): void => {
-    setUploadedFiles(uploadedFiles.filter(file => file.id !== id));
+    const updatedFiles = uploadedFiles.filter(file => file.id !== id);
+    setUploadedFiles(updatedFiles);
+    
+    // Update localStorage
+    const filesToSave = updatedFiles.map(f => ({
+      id: f.id,
+      name: f.name,
+      type: f.type,
+      size: f.size
+    }));
+    localStorage.setItem('uploadedFiles', JSON.stringify(filesToSave));
   };
 
   const handleFileClick = (fileItem: UploadedFile): void => {
@@ -295,6 +317,15 @@ const UploadPage: React.FC = () => {
       {activeTab === 'summary' && <SummaryTab uploadedFiles={uploadedFiles} />}
         </div>
       </main>
+      
+      {/* Toast Notification */}
+      {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 };
