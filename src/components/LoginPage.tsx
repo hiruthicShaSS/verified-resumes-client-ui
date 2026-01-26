@@ -137,7 +137,7 @@ const LoginPage: React.FC = () => {
                     onClick={() => setShowHRModal(true)}
                     type="button"
                   >
-                    👔 Register HR
+                    👔 Register User
                   </button>
                 </div>
               </>

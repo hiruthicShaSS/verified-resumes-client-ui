@@ -116,7 +116,7 @@ const EmailManagementModal: React.FC<EmailManagementModalProps> = ({ onClose }) 
   };
 
   const getRoleDisplayName = (role: string): string => {
-    return role === 'admin' ? 'CEO (Admin)' : 'HR';
+    return role === 'admin' ? 'Admin' : 'HR';
   };
 
   const adminEmails = emails.filter(e => e.role === 'admin');
@@ -154,7 +154,7 @@ const EmailManagementModal: React.FC<EmailManagementModalProps> = ({ onClose }) 
                   className="form-select"
                 >
                   <option value="hr">HR</option>
-                  <option value="admin">CEO (Admin)</option>
+                  <option value="admin">Admin</option>
                 </select>
               </div>
               <button 
@@ -180,7 +180,7 @@ const EmailManagementModal: React.FC<EmailManagementModalProps> = ({ onClose }) 
                 <div className="role-section">
                   <h3 className="role-title">
                     <span className="role-icon">👑</span>
-                    CEO (Admin) Emails
+                    Admin Emails
                   </h3>
                   {adminEmails.length === 0 ? (
                     <div className="empty-state">No admin emails registered</div>
@@ -205,14 +205,14 @@ const EmailManagementModal: React.FC<EmailManagementModalProps> = ({ onClose }) 
                   )}
                 </div>
 
-                {/* HR Emails */}
+                {/* User Emails */}
                 <div className="role-section">
                   <h3 className="role-title">
                     <span className="role-icon">👔</span>
-                    HR Emails
+                    User Emails
                   </h3>
                   {hrEmails.length === 0 ? (
-                    <div className="empty-state">No HR emails registered</div>
+                    <div className="empty-state">No User emails registered</div>
                   ) : (
                     <div className="emails-list">
                       {hrEmails.map((email) => (

@@ -85,7 +85,7 @@ const LandingPage: React.FC = () => {
         <button 
           className="admin-register-btn" 
           onClick={() => setShowAdminModal(true)}
-          title="Register as CEO/Admin"
+          title="Register as Admin"
         >
           👑 Register Admin
         </button>
@@ -94,7 +94,7 @@ const LandingPage: React.FC = () => {
           onClick={() => setShowHRModal(true)}
           title="Register as HR"
         >
-          👔 Register HR
+          👔 Register User
         </button>
       </div>
 

@@ -188,7 +188,7 @@ const AdminRegistrationModal: React.FC<AdminRegistrationModalProps> = ({ onClose
       <div className="admin-modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="admin-modal-header">
           <div className="admin-header-icon">👑</div>
-          <h2>CEO / Admin Registration</h2>
+          <h2>Admin Registration</h2>
           <button className="close-btn" onClick={onClose}>×</button>
         </div>
 
@@ -196,7 +196,7 @@ const AdminRegistrationModal: React.FC<AdminRegistrationModalProps> = ({ onClose
           {step === 'email' ? (
             <>
               <p className="admin-description">
-                Register your email address as a CEO/Admin. You will receive a verification code to complete registration.
+                Register your email address as a Admin. You will receive a verification code to complete registration.
               </p>
 
               <form onSubmit={(e) => { e.preventDefault(); sendVerificationCode(); }} className="admin-registration-form">
@@ -207,7 +207,7 @@ const AdminRegistrationModal: React.FC<AdminRegistrationModalProps> = ({ onClose
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="form-input"
-                    placeholder="ceo@company.com"
+                    placeholder="admin@company.com"
                     disabled={isSendingCode}
                     required
                   />
