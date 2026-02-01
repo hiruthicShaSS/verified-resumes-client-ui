@@ -11,7 +11,6 @@ import PostJobPage from './components/PostJobPage.tsx';
 import ApplyJobPage from './components/ApplyJobPage.tsx';
 import TeamManagementPage from './components/TeamManagementPage.tsx';
 import ProtectedRoute from './components/ProtectedRoute.tsx';
-import Ghost from './components/Ghost.tsx';
 
 const App: React.FC = () => {
   return (
@@ -72,8 +71,6 @@ const App: React.FC = () => {
               {/* Redirect any unknown routes to login */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-            {/* Cute ghost that follows cursor on all pages */}
-            <Ghost />
           </div>
         </Router>
       </AuthProvider>
