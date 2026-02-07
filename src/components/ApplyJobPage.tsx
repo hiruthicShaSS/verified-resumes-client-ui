@@ -4,7 +4,7 @@ import { useTheme } from '../contexts/ThemeContext.tsx';
 import Header from './Header.tsx';
 import './common.css';
 import './ApplyJobPage.css';
-import { UploadIcon, FileIcon } from './Icons.tsx';
+import { FileIcon } from './Icons.tsx';
 import Toast from './Toast.tsx';
 
 interface ApplicationData {
@@ -13,8 +13,7 @@ interface ApplicationData {
   isCurrentlyWorking: boolean;
   currentCompany: string;
   currentDesignation: string;
-  resumeFile: File | null;
-  useUploadedResume: boolean;
+  selectedResumeIndex: number;
 }
 
 const ApplyJobPage: React.FC = () => {
@@ -27,8 +26,7 @@ const ApplyJobPage: React.FC = () => {
     isCurrentlyWorking: false,
     currentCompany: '',
     currentDesignation: '',
-    resumeFile: null,
-    useUploadedResume: false
+    selectedResumeIndex: 0
   });
   const [uploadedResumes, setUploadedResumes] = useState<any[]>([]);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
@@ -37,6 +35,10 @@ const ApplyJobPage: React.FC = () => {
     // Load uploaded resumes from localStorage
     const savedFiles = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
     setUploadedResumes(savedFiles);
+    // Set default selected resume to first one if available
+    if (savedFiles.length > 0 && formData.selectedResumeIndex >= savedFiles.length) {
+      setFormData(prev => ({ ...prev, selectedResumeIndex: 0 }));
+    }
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -49,52 +51,69 @@ const ApplyJobPage: React.FC = () => {
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      setFormData(prev => ({
-        ...prev,
-        resumeFile: e.target.files![0],
-        useUploadedResume: false
-      }));
-    }
-  };
 
-  const handleResumeOptionChange = (useUploaded: boolean) => {
-    setFormData(prev => ({
-      ...prev,
-      useUploadedResume: useUploaded,
-      resumeFile: useUploaded ? null : prev.resumeFile
-    }));
-  };
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Save application
-    const applications = JSON.parse(localStorage.getItem('applications') || '[]');
-    const newApplication = {
-      id: Date.now().toString(),
-      jobId: jobId,
-      ...formData,
-      submittedDate: new Date().toISOString(),
-      resumeFileName: formData.useUploadedResume 
-        ? uploadedResumes[0]?.name || 'Uploaded Resume'
-        : formData.resumeFile?.name || 'No Resume'
-    };
-    applications.push(newApplication);
-    localStorage.setItem('applications', JSON.stringify(applications));
+    if (!jobId) {
+      setToast({ message: 'Job ID is missing.', type: 'error' });
+      return;
+    }
+
+    const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     
-    setToast({ message: 'Application submitted successfully!', type: 'success' });
-    setTimeout(() => {
-      navigate('/job-listings');
-    }, 1500);
+    try {
+      // Create FormData for file upload
+      const formDataToSend = new FormData();
+      formDataToSend.append('jobId', jobId);
+      formDataToSend.append('applicantName', formData.name);
+      formDataToSend.append('applicantEmail', userData.email || '');
+      formDataToSend.append('yearsOfExperience', formData.yearsOfExperience);
+      formDataToSend.append('isCurrentlyWorking', formData.isCurrentlyWorking.toString());
+      formDataToSend.append('currentCompany', formData.currentCompany || '');
+      formDataToSend.append('currentDesignation', formData.currentDesignation || '');
+      
+      // Handle resume file - must use uploaded resume from profile
+      if (uploadedResumes.length === 0) {
+        setToast({ message: 'Please upload a resume on your profile first.', type: 'error' });
+        return;
+      }
+
+      const selectedResume = uploadedResumes[formData.selectedResumeIndex];
+      if (!selectedResume) {
+        setToast({ message: 'Please select a resume from your profile.', type: 'error' });
+        return;
+      }
+
+      // Send resume file name - backend will fetch the actual file from user's profile
+      formDataToSend.append('resumeFileName', selectedResume.name);
+
+      const response = await fetch('http://localhost:5000/api/applications', {
+        method: 'POST',
+        body: formDataToSend
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        setToast({ message: data.message || 'Application submitted successfully!', type: 'success' });
+        setTimeout(() => {
+          navigate('/job-listings');
+        }, 1500);
+      } else {
+        setToast({ message: data.message || 'Failed to submit application.', type: 'error' });
+      }
+    } catch (error) {
+      console.error('Error submitting application:', error);
+      setToast({ message: 'Failed to submit application. Please try again.', type: 'error' });
+    }
   };
 
   const isFormValid = () => {
     return formData.name.trim() !== '' &&
            formData.yearsOfExperience.trim() !== '' &&
            (!formData.isCurrentlyWorking || (formData.currentCompany.trim() !== '' && formData.currentDesignation.trim() !== '')) &&
-           (formData.resumeFile !== null || formData.useUploadedResume);
+           uploadedResumes.length > 0;
   };
 
   return (
@@ -203,98 +222,45 @@ const ApplyJobPage: React.FC = () => {
               <h2 className="section-title">Resume</h2>
               
               {uploadedResumes.length > 0 ? (
-                <>
-                  <div className="form-group">
-                    <p className="resume-option-label">Choose your resume option:</p>
-                    <div className="resume-options">
-                      <label className="resume-option-card">
-                        <input
-                          type="radio"
-                          name="resumeOption"
-                          checked={formData.useUploadedResume}
-                          onChange={() => handleResumeOptionChange(true)}
-                        />
-                        <div className="resume-option-content">
-                          <div className="resume-option-header">
-                            <FileIcon size={24} />
-                            <span className="resume-option-title">Use Uploaded Resume</span>
-                          </div>
-                          <div className="resume-option-files">
-                            {uploadedResumes.map((file, index) => (
-                              <div key={index} className="resume-file-item">
-                                <FileIcon size={16} />
-                                <span>{file.name}</span>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      </label>
-                      
-                      <label className="resume-option-card">
-                        <input
-                          type="radio"
-                          name="resumeOption"
-                          checked={!formData.useUploadedResume}
-                          onChange={() => handleResumeOptionChange(false)}
-                        />
-                        <div className="resume-option-content">
-                          <div className="resume-option-header">
-                            <UploadIcon size={24} />
-                            <span className="resume-option-title">Upload New Resume</span>
-                          </div>
-                          <div className="file-upload-area">
-                            <input
-                              id="resumeFile"
-                              type="file"
-                              name="resumeFile"
-                              accept=".pdf"
-                              onChange={handleFileChange}
-                              className="file-input"
-                              disabled={formData.useUploadedResume}
-                              required={!formData.useUploadedResume}
-                            />
-                            <label htmlFor="resumeFile" className="file-upload-label">
-                              <UploadIcon size={24} />
-                              <span>Click to upload or drag and drop</span>
-                              <span className="file-upload-hint">PDF files only</span>
-                            </label>
-                            {formData.resumeFile && (
-                              <div className="selected-file">
-                                <FileIcon size={20} />
-                                <span>{formData.resumeFile.name}</span>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      </label>
-                    </div>
-                  </div>
-                </>
-              ) : (
                 <div className="form-group">
-                  <label htmlFor="resumeFile" className="form-label">Upload Resume *</label>
-                  <div className="file-upload-area">
-                    <input
-                      id="resumeFile"
-                      type="file"
-                      name="resumeFile"
-                      accept=".pdf"
-                      onChange={handleFileChange}
-                      className="file-input"
-                      required
-                    />
-                    <label htmlFor="resumeFile" className="file-upload-label">
-                      <UploadIcon size={24} />
-                      <span>Click to upload or drag and drop</span>
-                      <span className="file-upload-hint">PDF files only</span>
-                    </label>
-                    {formData.resumeFile && (
-                      <div className="selected-file">
-                        <FileIcon size={20} />
-                        <span>{formData.resumeFile.name}</span>
-                      </div>
-                    )}
+                  <p className="resume-option-label">Select a resume from your profile:</p>
+                  <div className="resume-selection-list">
+                    {uploadedResumes.map((file, index) => (
+                      <label key={index} className={`resume-selection-item ${formData.selectedResumeIndex === index ? 'selected' : ''}`}>
+                        <input
+                          type="radio"
+                          name="selectedResume"
+                          checked={formData.selectedResumeIndex === index}
+                          onChange={() => setFormData(prev => ({ ...prev, selectedResumeIndex: index }))}
+                        />
+                        <div className="resume-selection-content">
+                          <FileIcon size={20} />
+                          <div className="resume-info">
+                            <span className="resume-name">{file.name}</span>
+                            {file.size && <span className="resume-size">{file.size}</span>}
+                          </div>
+                        </div>
+                      </label>
+                    ))}
                   </div>
+                  <p className="resume-note">
+                    💡 To update your resume, go to your <button type="button" className="link-button" onClick={() => navigate('/upload')}>profile</button>
+                  </p>
+                </div>
+              ) : (
+                <div className="no-resume-message">
+                  <div className="no-resume-icon">📄</div>
+                  <h3 className="no-resume-title">No Resume Found</h3>
+                  <p className="no-resume-text">
+                    Please upload a resume on your profile before applying for jobs.
+                  </p>
+                  <button 
+                    type="button"
+                    className="go-to-profile-btn"
+                    onClick={() => navigate('/upload')}
+                  >
+                    Go to Profile & Upload Resume
+                  </button>
                 </div>
               )}
             </div>

@@ -135,31 +135,46 @@
 
 .tabs-container {
   display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--bg-tertiary);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  padding: 4px;
+  align-items: stretch;
+  gap: 0;
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  padding: 0;
   border-radius: 12px;
-  border: 1px solid var(--border-color);
-  box-shadow: 0 4px 16px var(--shadow-color);
-  transition: background-color 0.3s ease, border-color 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  transition: all 0.3s ease;
+  overflow: hidden;
 }
 
 .tab {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  justify-content: center;
+  gap: 10px;
+  padding: 10px 24px;
   background: transparent;
   border: none;
-  color: var(--text-tertiary);
-  font-size: 16px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 14px;
   cursor: pointer;
-  border-radius: 8px;
-  transition: all 0.3s ease;
-  font-weight: 500;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  position: relative;
+  min-width: 150px;
+}
+
+.tab:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 25%;
+  bottom: 25%;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .tab:hover:not(.active) {
@@ -172,12 +187,19 @@
 }
 
 .tab.active {
-  color: var(--text-primary);
-  background: var(--bg-secondary);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  box-shadow: 0 4px 16px var(--shadow-color);
-  transform: translateY(-1px);
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #3b82f6;
+  box-shadow: 0 -1px 10px rgba(59, 130, 246, 0.5);
 }
 
 .theme-light .tab.active {
@@ -189,22 +211,23 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.15);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   color: rgba(255, 255, 255, 0.7);
-  font-size: 14px;
-  font-weight: 600;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-size: 13px;
+  font-weight: 800;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .tab.active .tab-number {
-  background: rgba(17, 24, 39, 0.9);
-  color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  background: #111827;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .tab.completed .tab-number {
@@ -217,14 +240,14 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
   background: rgba(16, 185, 129, 0.9);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   color: white;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: bold;
   box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
@@ -303,7 +326,8 @@
   padding: 24px;
   overflow-y: auto;
   background: transparent;
-  min-height: 0; /* Important for flex scrolling */
+  min-height: 0;
+  /* Important for flex scrolling */
 }
 
 .job-listing-content {
@@ -515,6 +539,30 @@
   display: flex;
   gap: 12px;
   margin-bottom: 24px;
+}
+
+.view-applicants-btn {
+  padding: 12px 24px;
+  background: rgba(139, 92, 246, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.view-applicants-btn:hover {
+  background: rgba(139, 92, 246, 0.95);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
 }
 
 .apply-btn {

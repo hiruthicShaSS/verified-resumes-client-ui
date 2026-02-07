@@ -350,6 +350,134 @@
   color: var(--text-primary);
 }
 
+/* Resume Selection List */
+.resume-selection-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.resume-selection-item {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  background: var(--bg-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.resume-selection-item:hover {
+  background: var(--bg-tertiary);
+  border-color: rgba(59, 130, 246, 0.5);
+}
+
+.resume-selection-item.selected {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.8);
+}
+
+.resume-selection-item input[type="radio"] {
+  margin-right: 12px;
+  cursor: pointer;
+}
+
+.resume-selection-content {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.resume-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.resume-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.resume-size {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.resume-note {
+  margin-top: 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-style: italic;
+}
+
+.link-button {
+  background: none;
+  border: none;
+  color: rgba(59, 130, 246, 1);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: inherit;
+  padding: 0;
+  margin: 0 4px;
+}
+
+.link-button:hover {
+  color: rgba(59, 130, 246, 0.8);
+}
+
+/* No Resume Message */
+.no-resume-message {
+  text-align: center;
+  padding: 40px 20px;
+  background: var(--bg-secondary);
+  border: 2px dashed var(--border-color);
+  border-radius: 12px;
+  margin-top: 16px;
+}
+
+.no-resume-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
+
+.no-resume-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 8px 0;
+}
+
+.no-resume-text {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0 0 24px 0;
+  line-height: 1.6;
+}
+
+.go-to-profile-btn {
+  padding: 12px 24px;
+  background: rgba(59, 130, 246, 0.8);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.go-to-profile-btn:hover {
+  background: rgba(59, 130, 246, 1);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
 .resume-option-files {
   display: flex;
   flex-direction: column;

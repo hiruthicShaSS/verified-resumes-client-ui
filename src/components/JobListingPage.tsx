@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTheme } from '../contexts/ThemeContext.tsx';
+import { useUserRole } from '../hooks/useUserRole.ts';
 import Header from './Header.tsx';
 import './common.css';
 import './JobListingPage.css';
@@ -22,6 +23,7 @@ interface Job {
 const JobListingPage: React.FC = () => {
   const navigate = useNavigate();
   const { theme } = useTheme();
+  const { canViewApplicants } = useUserRole();
   const [activeTab, setActiveTab] = useState<TabType>('search');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [location, setLocation] = useState<string>('');
@@ -343,12 +345,28 @@ const JobListingPage: React.FC = () => {
                           <span>{selectedJob.type}</span>
                         </div>
                         <div className="action-buttons">
-                          <button className="apply-btn" onClick={handleApply}>
-                            Apply <span>↗</span>
-                          </button>
-                          <button className="save-btn" onClick={handleSave}>
-                            Save
-                          </button>
+                          {canViewApplicants ? (
+                            <>
+                              <button 
+                                className="view-applicants-btn" 
+                                onClick={() => navigate(`/applicants/job/${selectedJob.id}`)}
+                              >
+                                👥 View Applicants
+                              </button>
+                              <button className="save-btn" onClick={handleSave}>
+                                Save
+                              </button>
+                            </>
+                          ) : (
+                            <>
+                              <button className="apply-btn" onClick={handleApply}>
+                                Apply <span>↗</span>
+                              </button>
+                              <button className="save-btn" onClick={handleSave}>
+                                Save
+                              </button>
+                            </>
+                          )}
                         </div>
                         <div className="job-description">
                           <h3>About the job</h3>

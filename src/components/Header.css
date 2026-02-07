@@ -21,36 +21,54 @@
 
 .back-btn {
   padding: 10px 20px;
-  background: var(--bg-tertiary);
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-  color: var(--text-primary);
-  border: 1px solid var(--border-color);
+  color: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 8px;
   font-size: 16px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+body.theme-light .back-btn,
+.theme-light .back-btn {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .back-btn:hover:not(:disabled) {
-  background: var(--bg-secondary);
+  background: rgba(255, 255, 255, 0.15);
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px var(--shadow-color);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+body.theme-light .back-btn:hover:not(:disabled),
+.theme-light .back-btn:hover:not(:disabled) {
+  background: #f8fafc;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
 .back-btn:disabled {
-  background: var(--bg-secondary);
-  color: var(--text-tertiary);
-  cursor: not-allowed;
   opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .header-title {
-  font-size: 20px;
+  font-size: 24px;
   font-weight: 600;
-  color: var(--text-primary);
+  color: rgba(255, 255, 255, 0.95);
   margin: 0;
+}
+
+body.theme-light .header-title,
+.theme-light .header-title {
+  color: #0f172a;
 }
 
 .header-right {
@@ -226,9 +244,8 @@ body.theme-dark .theme-toggle-btn {
   .user-name {
     display: none;
   }
-  
+
   .header-title {
-    font-size: 18px;
+    font-size: 20px;
   }
 }
-

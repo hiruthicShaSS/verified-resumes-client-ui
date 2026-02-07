@@ -23,21 +23,15 @@
 }
 
 .login-page-wrapper.theme-light {
-  --bg-primary: #f5f7fa;
-  --bg-secondary: rgba(255, 250, 245, 0.85);
-  --bg-tertiary: rgba(255, 252, 250, 0.9);
-  --text-primary: #2d3748;
-  --text-secondary: #4a5568;
-  --text-tertiary: #718096;
-  --border-color: rgba(203, 213, 225, 0.6);
-  --shadow-color: rgba(148, 163, 184, 0.15);
-  background: linear-gradient(135deg,
-      #fef3f2 0%,
-      #fef7ed 20%,
-      #f0fdf4 40%,
-      #eff6ff 60%,
-      #f5f3ff 80%,
-      #fef3f2 100%);
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f8fafc;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --border-color: #e2e8f0;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
   background-attachment: fixed;
 }
 
@@ -84,7 +78,7 @@
   -webkit-backdrop-filter: blur(20px);
   border-radius: 24px;
   border: 1px solid var(--border-color);
-  box-shadow: 
+  box-shadow:
     0 20px 60px rgba(0, 0, 0, 0.5),
     0 0 0 1px rgba(255, 255, 255, 0.05) inset;
   padding: 48px 40px;
@@ -105,7 +99,7 @@
 
 .login-card:hover {
   transform: translateY(-2px);
-  box-shadow: 
+  box-shadow:
     0 25px 70px rgba(0, 0, 0, 0.6),
     0 0 0 1px rgba(255, 255, 255, 0.1) inset;
 }
@@ -147,8 +141,8 @@
 }
 
 .login-title {
-  font-size: 32px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 600;
   color: var(--text-primary);
   margin: 0 0 8px 0;
   letter-spacing: -0.5px;
@@ -273,12 +267,12 @@
 .admin-register-link-btn,
 .hr-register-link-btn {
   flex: 1;
-  padding: 12px 16px;
+  padding: 10px 20px;
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-primary);
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;

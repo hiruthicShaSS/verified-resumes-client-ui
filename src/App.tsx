@@ -10,6 +10,7 @@ import JobListingPage from './components/JobListingPage.tsx';
 import PostJobPage from './components/PostJobPage.tsx';
 import ApplyJobPage from './components/ApplyJobPage.tsx';
 import TeamManagementPage from './components/TeamManagementPage.tsx';
+import ApplicantsPage from './components/ApplicantsPage.tsx';
 import ProtectedRoute from './components/ProtectedRoute.tsx';
 import Ghost from './components/Ghost.tsx';
 
@@ -66,6 +67,22 @@ const App: React.FC = () => {
                 element={
                   <ProtectedRoute>
                     <TeamManagementPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/applicants" 
+                element={
+                  <ProtectedRoute>
+                    <ApplicantsPage />
+                  </ProtectedRoute>
+                } 
+              />
+              <Route 
+                path="/applicants/job/:jobId" 
+                element={
+                  <ProtectedRoute>
+                    <ApplicantsPage />
                   </ProtectedRoute>
                 } 
               />
