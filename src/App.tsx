@@ -5,14 +5,16 @@ import { AuthProvider } from './contexts/AuthContext.tsx';
 import './App.css';
 import LandingPage from './components/LandingPage.tsx';
 import LoginPage from './components/LoginPage.tsx';
+import EmailVerificationPage from './components/EmailVerificationPage.tsx';
 import UploadPage from './components/UploadPage.tsx';
 import JobListingPage from './components/JobListingPage.tsx';
 import PostJobPage from './components/PostJobPage.tsx';
 import ApplyJobPage from './components/ApplyJobPage.tsx';
 import TeamManagementPage from './components/TeamManagementPage.tsx';
 import ApplicantsPage from './components/ApplicantsPage.tsx';
+import AdminSetupPage from './components/AdminSetupPage.tsx';
+import PreviousCompanyVerificationPage from './components/PreviousCompanyVerificationPage.tsx';
 import ProtectedRoute from './components/ProtectedRoute.tsx';
-import Ghost from './components/Ghost.tsx';
 
 const App: React.FC = () => {
   return (
@@ -22,6 +24,10 @@ const App: React.FC = () => {
           <div className="App">
             <Routes>
               <Route path="/" element={<LoginPage />} />
+              {/* Hidden admin setup route - not exposed in navigation */}
+              <Route path="/setup/admin" element={<AdminSetupPage />} />
+              {/* Email verification route - accessible without full auth */}
+              <Route path="/verify-email" element={<EmailVerificationPage />} />
               <Route 
                 path="/home" 
                 element={
@@ -86,11 +92,17 @@ const App: React.FC = () => {
                   </ProtectedRoute>
                 } 
               />
+              <Route 
+                path="/previous-company/verifications" 
+                element={
+                  <ProtectedRoute>
+                    <PreviousCompanyVerificationPage />
+                  </ProtectedRoute>
+                } 
+              />
               {/* Redirect any unknown routes to login */}
               <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
-            {/* Cute ghost that follows cursor on all pages */}
-            <Ghost />
           </div>
         </Router>
       </AuthProvider>

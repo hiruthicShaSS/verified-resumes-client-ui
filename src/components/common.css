@@ -2,8 +2,20 @@
    COMMON STYLES - Shared across components
    ============================================ */
 
-/* Theme Variables */
+/* Theme Variables - Using Tailwind dark mode */
 .upload-page-wrapper {
+  --bg-primary: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-tertiary: #f8fafc;
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-tertiary: #64748b;
+  --border-color: #e2e8f0;
+  --shadow-color: rgba(0, 0, 0, 0.1);
+  background: #f8fafc;
+}
+
+.dark .upload-page-wrapper {
   --bg-primary: #000000;
   --bg-secondary: rgba(255, 255, 255, 0.05);
   --bg-tertiary: rgba(255, 255, 255, 0.08);
@@ -13,19 +25,6 @@
   --border-color: rgba(255, 255, 255, 0.1);
   --shadow-color: rgba(0, 0, 0, 0.5);
   background: #000000;
-}
-
-.upload-page-wrapper.theme-light {
-  --bg-primary: #f8fafc;
-  --bg-secondary: #ffffff;
-  --bg-tertiary: #f8fafc;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-tertiary: #64748b;
-  --border-color: #e2e8f0;
-  --shadow-color: rgba(0, 0, 0, 0.1);
-  background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
-  background-attachment: fixed;
 }
 
 /* Common Glassmorphism Effect */

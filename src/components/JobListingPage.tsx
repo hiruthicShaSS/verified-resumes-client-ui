@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../contexts/ThemeContext.tsx';
+import { Home } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext.tsx';
 import { useUserRole } from '../hooks/useUserRole.ts';
 import Header from './Header.tsx';
+import { Background } from './Background.tsx';
 import './common.css';
 import './JobListingPage.css';
 import Toast from './Toast.tsx';
@@ -18,20 +20,46 @@ interface Job {
   postedDate: string;
   description: string;
   salary?: string;
+  companyName?: string;
+}
+
+interface Comment {
+  _id?: string;
+  text: string;
+  addedBy: string;
+  addedByEmail: string;
+  addedAt: string;
+}
+
+interface AppliedJob {
+  _id: string;
+  jobId: string;
+  applicantEmail: string;
+  applicantName: string;
+  appliedDate: string;
+  status: 'pending' | 'reviewed' | 'accepted' | 'rejected';
+  jobTitle?: string;
+  companyName?: string;
+  comments?: Comment[];
 }
 
 const JobListingPage: React.FC = () => {
   const navigate = useNavigate();
-  const { theme } = useTheme();
-  const { canViewApplicants } = useUserRole();
+  const { user } = useAuth();
+  const { canViewApplicants, companyName, isAdmin, isCompanyMember } = useUserRole();
   const [activeTab, setActiveTab] = useState<TabType>('search');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [location, setLocation] = useState<string>('');
-  const [jobs, setJobs] = useState<Job[]>([]);
+  const [allJobs, setAllJobs] = useState<Job[]>([]); // Store all fetched jobs
+  const [jobs, setJobs] = useState<Job[]>([]); // Filtered jobs for display
   const [selectedJob, setSelectedJob] = useState<Job | null>(null);
   const [hasSearched, setHasSearched] = useState<boolean>(false);
   const [refreshKey, setRefreshKey] = useState<number>(0);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [appliedJobs, setAppliedJobs] = useState<AppliedJob[]>([]);
+  const [isLoadingApplications, setIsLoadingApplications] = useState<boolean>(false);
 
   const formatDate = (dateString: string): string => {
     const date = new Date(dateString);
@@ -46,35 +74,114 @@ const JobListingPage: React.FC = () => {
     return `${Math.floor(diffDays / 30)} months ago`;
   };
 
-  useEffect(() => {
-    // Load ALL posted jobs on mount - visible to all users
-    const postedJobs = JSON.parse(localStorage.getItem('postedJobs') || '[]');
-    if (postedJobs.length > 0) {
-      // Sort by posted date (newest first)
-      const sortedJobs = [...postedJobs].sort((a: any, b: any) => {
-        const dateA = new Date(a.postedDate || 0).getTime();
-        const dateB = new Date(b.postedDate || 0).getTime();
-        return dateB - dateA;
-      });
+  const fetchJobs = async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
       
-      const transformedJobs: Job[] = sortedJobs.map((job: any) => ({
-        id: job.id || Math.random().toString(),
-        title: job.role || 'Untitled Position',
-        company: job.company || job.companyName || 'Company',
-        location: job.location || 'Location',
-        type: job.type || 'Full-time',
-        postedDate: job.postedDate ? formatDate(job.postedDate) : 'Recently posted',
-        description: `${job.aboutJob || ''}\n\nCompany Overview:\n${job.companyOverview || ''}\n\nJob Description:\n${job.jobDescription || ''}\n\nPreferred Qualifications:\n${job.preferredQualifications || ''}\n\nMinimum Qualifications:\n${job.minimumQualifications || ''}`,
-        salary: job.salary,
-        postedBy: job.postedBy || 'Anonymous'
-      }));
-      setJobs(transformedJobs);
-      if (transformedJobs.length > 0) {
-        setSelectedJob(transformedJobs[0]);
-        setHasSearched(true);
+      const response = await fetch('http://localhost:5000/api/jobs', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch jobs: ${response.statusText}`);
       }
+
+      const data = await response.json();
+      
+      if (data.success && data.jobs) {
+        // Show ALL jobs to everyone - users can apply to jobs from any company
+        // Company filtering only applies to "View Applicants" button visibility
+        
+        // Sort by posted date (newest first)
+        const sortedJobs = [...data.jobs].sort((a: any, b: any) => {
+          const dateA = new Date(a.postedDate || 0).getTime();
+          const dateB = new Date(b.postedDate || 0).getTime();
+          return dateB - dateA;
+        });
+        
+        const transformedJobs: Job[] = sortedJobs.map((job: any) => ({
+          id: job.id || Math.random().toString(),
+          title: job.role || 'Untitled Position',
+          company: job.company || job.companyName || 'Company',
+          location: job.location || 'Location',
+          type: job.type || job.jobType || 'Full-time',
+          postedDate: job.postedDate ? formatDate(job.postedDate) : 'Recently posted',
+          description: `${job.aboutJob || ''}\n\nCompany Overview:\n${job.companyOverview || ''}\n\nJob Description:\n${job.jobDescription || ''}\n\nPreferred Qualifications:\n${job.preferredQualifications || ''}\n\nMinimum Qualifications:\n${job.minimumQualifications || ''}`,
+          salary: job.salary,
+          postedBy: job.postedBy || 'Anonymous',
+          companyName: job.companyName || job.company // Store company name for filtering
+        }));
+        
+        setAllJobs(transformedJobs); // Store all jobs
+        setJobs(transformedJobs); // Initially show all jobs
+        if (transformedJobs.length > 0) {
+          setSelectedJob(transformedJobs[0]);
+          setHasSearched(true);
+        }
+      } else {
+        throw new Error('Invalid response format');
+      }
+    } catch (err) {
+      console.error('Error fetching jobs:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch job listings';
+      setError(errorMessage);
+      setToast({ message: errorMessage, type: 'error' });
+      setJobs([]);
+    } finally {
+      setIsLoading(false);
     }
-  }, []);
+  };
+
+  // Fetch applied jobs from API
+  const fetchAppliedJobs = async () => {
+    if (!user?.email) {
+      setAppliedJobs([]);
+      return;
+    }
+
+    try {
+      setIsLoadingApplications(true);
+      const response = await fetch(`http://localhost:5000/api/applications/my-applications?applicantEmail=${encodeURIComponent(user.email)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to fetch applications: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      
+      if (data.success && data.applications) {
+        setAppliedJobs(data.applications || []);
+      } else {
+        setAppliedJobs([]);
+      }
+    } catch (err) {
+      console.error('Error fetching applied jobs:', err);
+      setAppliedJobs([]);
+    } finally {
+      setIsLoadingApplications(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchJobs();
+    fetchAppliedJobs();
+  }, [user]);
+
+  // Refresh applied jobs when tab changes to 'applied'
+  useEffect(() => {
+    if (activeTab === 'applied' && user?.email) {
+      fetchAppliedJobs();
+    }
+  }, [activeTab, user]);
 
   const tabs: TabType[] = ['search', 'saved', 'applied'];
 
@@ -95,48 +202,36 @@ const JobListingPage: React.FC = () => {
   const isFirstTab = activeTab === 'search';
   const isLastTab = activeTab === 'applied';
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Load ALL posted jobs from localStorage - visible to all users
-    const postedJobs = JSON.parse(localStorage.getItem('postedJobs') || '[]');
     
-    // Sort by posted date (newest first)
-    const sortedJobs = [...postedJobs].sort((a: any, b: any) => {
-      const dateA = new Date(a.postedDate || 0).getTime();
-      const dateB = new Date(b.postedDate || 0).getTime();
-      return dateB - dateA;
-    });
+    // If jobs haven't been loaded yet, fetch them first
+    if (allJobs.length === 0 && !isLoading) {
+      await fetchJobs();
+      // After fetching, continue with filtering using the newly fetched jobs
+      // Note: fetchJobs will set allJobs and jobs, so we filter from allJobs
+    }
+    
+    // Use allJobs for filtering (contains all fetched jobs)
+    const jobsToFilter = allJobs.length > 0 ? allJobs : jobs;
     
     // Filter jobs based on search criteria
-    let filteredJobs = sortedJobs;
+    let filteredJobs = jobsToFilter;
     
     if (searchQuery.trim() || location.trim()) {
-      filteredJobs = sortedJobs.filter((job: any) => {
+      filteredJobs = jobsToFilter.filter((job: Job) => {
         const matchesQuery = !searchQuery.trim() || 
-          job.role?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          job.company?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          job.companyName?.toLowerCase().includes(searchQuery.toLowerCase());
+          job.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          job.company?.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesLocation = !location.trim() ||
           job.location?.toLowerCase().includes(location.toLowerCase());
         return matchesQuery && matchesLocation;
       });
     }
     
-    // Transform posted jobs to match Job interface
-    const transformedJobs: Job[] = filteredJobs.map((job: any) => ({
-      id: job.id || Math.random().toString(),
-      title: job.role || 'Untitled Position',
-      company: job.company || 'Company',
-      location: job.location || 'Location',
-      type: job.type || 'Full-time',
-      postedDate: job.postedDate ? formatDate(job.postedDate) : 'Recently posted',
-      description: `${job.aboutJob || ''}\n\nCompany Overview:\n${job.companyOverview || ''}\n\nJob Description:\n${job.jobDescription || ''}\n\nPreferred Qualifications:\n${job.preferredQualifications || ''}\n\nMinimum Qualifications:\n${job.minimumQualifications || ''}`,
-      salary: job.salary
-    }));
-    
-    setJobs(transformedJobs);
-    if (transformedJobs.length > 0) {
-      setSelectedJob(transformedJobs[0]);
+    setJobs(filteredJobs);
+    if (filteredJobs.length > 0) {
+      setSelectedJob(filteredJobs[0]);
     } else {
       setSelectedJob(null);
     }
@@ -168,13 +263,17 @@ const JobListingPage: React.FC = () => {
   };
 
   return (
-    <div className={`job-listing-page-wrapper theme-${theme}`}>
+    <div className="job-listing-page-wrapper min-h-screen bg-slate-50 dark:bg-slate-950 relative transition-colors duration-300">
+      <Background />
       {/* Header */}
       <header className="job-listing-header-wrapper">
-        <div className="job-listing-header">
+        <div className="max-w-[1400px] mx-auto w-full"> 
+         <div className="job-listing-header">
           <div className="header-left">
-            <button className="cancel-link" onClick={() => navigate('/home')}>
-              Cancel
+            <button className="cancel-link" onClick={() => navigate('/home')} title="Home">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
             </button>
           </div>
           <div className="header-center">
@@ -224,6 +323,7 @@ const JobListingPage: React.FC = () => {
             </button>
           </div>
         </div>
+        </div>
       </header>
 
       {/* Main Content */}
@@ -232,7 +332,21 @@ const JobListingPage: React.FC = () => {
           {/* Search Tab */}
           {activeTab === 'search' && (
             <div className="search-tab-wrapper">
-              {!hasSearched ? (
+              {isLoading ? (
+                <div className="loading-container">
+                  <div className="spinner"></div>
+                  <span>Loading job listings...</span>
+                </div>
+              ) : error ? (
+                <div className="error-state">
+                  <div className="empty-state-icon">⚠️</div>
+                  <h3 className="empty-state-title">Error Loading Jobs</h3>
+                  <p className="empty-state-text">{error}</p>
+                  <button className="retry-btn" onClick={fetchJobs}>
+                    Retry
+                  </button>
+                </div>
+              ) : !hasSearched ? (
                 <div className="tab-content">
                   <h2 className="tab-content-title">Job Search</h2>
                   <p className="tab-content-text">
@@ -321,9 +435,6 @@ const JobListingPage: React.FC = () => {
                     {selectedJob ? (
                       <div className="job-details-content">
                         <div className="job-details-header">
-                          <div className="company-logo-large">
-                            {selectedJob.company.substring(0, 2).toUpperCase()}
-                          </div>
                           <button className="action-btn share-btn" onClick={handleApply}>
                             ↗
                           </button>
@@ -345,7 +456,9 @@ const JobListingPage: React.FC = () => {
                           <span>{selectedJob.type}</span>
                         </div>
                         <div className="action-buttons">
-                          {canViewApplicants ? (
+                          {canViewApplicants && selectedJob.companyName && 
+                           companyName && 
+                           selectedJob.companyName.trim().toLowerCase() === companyName.trim().toLowerCase() ? (
                             <>
                               <button 
                                 className="view-applicants-btn" 
@@ -408,8 +521,8 @@ const JobListingPage: React.FC = () => {
                 {/* Saved Jobs List */}
                 {(() => {
                   const savedJobs = JSON.parse(localStorage.getItem('savedJobs') || '[]');
-                  // Use refreshKey to force re-render
-                  const _ = refreshKey;
+                  // Use refreshKey to force re-render when saved jobs change
+                  void refreshKey;
                   return savedJobs.length === 0 ? (
                     <div className="empty-state">
                       <div className="empty-state-icon">⭐</div>
@@ -462,15 +575,35 @@ const JobListingPage: React.FC = () => {
                 </p>
 
                 {/* Applied Jobs List */}
-                {(() => {
-                  const applications = JSON.parse(localStorage.getItem('applications') || '[]');
-                  const postedJobs = JSON.parse(localStorage.getItem('postedJobs') || '[]');
-                  const appliedJobs = applications.map((app: any) => {
-                    const job = postedJobs.find((j: any) => j.id === app.jobId);
-                    return job ? { ...job, applicationDate: app.submittedDate } : null;
-                  }).filter(Boolean);
+                {isLoadingApplications ? (
+                  <div className="empty-state">
+                    <div className="empty-state-icon">⏳</div>
+                    <h3 className="empty-state-title">Loading applications...</h3>
+                  </div>
+                ) : (() => {
+                  // Match applied jobs with fetched jobs
+                  const matchedAppliedJobs = appliedJobs.map((app: AppliedJob) => {
+                    const job = allJobs.find((j: Job) => j.id === app.jobId);
+                    return job ? {
+                      ...job,
+                      applicationDate: app.appliedDate,
+                      applicationStatus: app.status,
+                      applicationId: app._id
+                    } : {
+                      id: app.jobId,
+                      title: app.jobTitle || 'Unknown Position',
+                      company: app.companyName || 'Company',
+                      location: 'Unknown',
+                      type: 'Unknown',
+                      postedDate: 'Unknown',
+                      description: '',
+                      applicationDate: app.appliedDate,
+                      applicationStatus: app.status,
+                      applicationId: app._id
+                    };
+                  });
 
-                  return appliedJobs.length === 0 ? (
+                  return matchedAppliedJobs.length === 0 ? (
                     <div className="empty-state">
                       <div className="empty-state-icon">📋</div>
                       <h3 className="empty-state-title">No applications yet</h3>
@@ -480,14 +613,40 @@ const JobListingPage: React.FC = () => {
                     </div>
                   ) : (
                     <div className="saved-jobs-list">
-                      {appliedJobs.map((job: any) => (
-                        <div key={job.id} className="saved-job-card">
-                          <h3 className="saved-job-title">{job.role}</h3>
-                          <p className="saved-job-company">{job.company || 'Company'}</p>
-                          <p className="saved-job-location">Applied on {job.applicationDate ? new Date(job.applicationDate).toLocaleDateString() : 'Recently'}</p>
-                          <div className="status-badge">Applied</div>
-                        </div>
-                      ))}
+                      {matchedAppliedJobs.map((job: any) => {
+                        const application = appliedJobs.find((app: AppliedJob) => app._id === job.applicationId);
+                        return (
+                          <div key={job.applicationId || job.id} className="saved-job-card">
+                            <h3 className="saved-job-title">{job.title}</h3>
+                            <p className="saved-job-company">{job.company || 'Company'}</p>
+                            <p className="saved-job-location">
+                              Applied on {job.applicationDate ? new Date(job.applicationDate).toLocaleDateString() : 'Recently'}
+                            </p>
+                            <div className={`status-badge ${job.applicationStatus === 'accepted' ? 'status-accepted' : job.applicationStatus === 'rejected' ? 'status-rejected' : job.applicationStatus === 'reviewed' ? 'status-reviewed' : job.applicationStatus === 'pending' ? 'status-pending' : ''}`}>
+                              {job.applicationStatus ? job.applicationStatus.charAt(0).toUpperCase() + job.applicationStatus.slice(1) : 'Applied'}
+                            </div>
+                            {/* Comments Section */}
+                            {application?.comments && application.comments.length > 0 && (
+                              <div className="application-comments-section">
+                                <h4 className="comments-section-title">Comments from Recruiter:</h4>
+                                <div className="comments-list">
+                                  {application.comments.map((comment: Comment, idx: number) => (
+                                    <div key={comment._id || idx} className="comment-item">
+                                      <div className="comment-header">
+                                        <span className="comment-author">{comment.addedBy}</span>
+                                        <span className="comment-date">
+                                          {comment.addedAt ? new Date(comment.addedAt).toLocaleDateString() : ''}
+                                        </span>
+                                      </div>
+                                      <p className="comment-text">{comment.text}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
                   );
                 })()}

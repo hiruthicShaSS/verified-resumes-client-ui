@@ -1,9 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { useTheme } from '../contexts/ThemeContext.tsx';
 import './Ghost.css';
 
 const Ghost: React.FC = () => {
-  const { theme } = useTheme();
   const [position, setPosition] = useState({ x: 100, y: 100 });
   const [mousePosition, setMousePosition] = useState({ x: 100, y: 100 });
 
@@ -39,7 +37,7 @@ const Ghost: React.FC = () => {
 
   return (
     <div 
-      className={`ghost-container theme-${theme}`}
+      className="ghost-container"
       style={{
         left: `${position.x}px`,
         top: `${position.y}px`,

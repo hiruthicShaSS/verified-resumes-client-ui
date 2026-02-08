@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../contexts/ThemeContext.tsx';
 import { useAuth } from '../contexts/AuthContext.tsx';
-import { SunIcon, MoonIcon } from './Icons.tsx';
 import ProfileModal from './ProfileModal.tsx';
 import './Header.css';
 
@@ -13,7 +11,6 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ showLogout = true, title, onBack }) => {
-  const { theme, toggleTheme } = useTheme();
   const { logout, user } = useAuth();
   const navigate = useNavigate();
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -32,8 +29,10 @@ const Header: React.FC<HeaderProps> = ({ showLogout = true, title, onBack }) => 
       <header className="app-header">
         <div className="header-left">
           {onBack && (
-            <button className="back-btn" onClick={onBack}>
-              ← Back
+            <button className="back-btn" onClick={onBack} title="Home">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
             </button>
           )}
           {title && <h1 className="header-title">{title}</h1>}
@@ -64,15 +63,6 @@ const Header: React.FC<HeaderProps> = ({ showLogout = true, title, onBack }) => 
               <span className="user-name">{user.displayName || user.email}</span>
             </div>
           )}
-          
-          <button 
-            className="theme-toggle-btn" 
-            onClick={toggleTheme} 
-            aria-label="Toggle theme"
-            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {theme === 'dark' ? <SunIcon size={20} /> : <MoonIcon size={20} />}
-          </button>
         </div>
       </header>
       

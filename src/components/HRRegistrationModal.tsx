@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { useTheme } from '../contexts/ThemeContext.tsx';
-import { collection, addDoc, getDocs, doc, setDoc, getDoc, deleteDoc } from 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
+import { useUserRole } from '../hooks/useUserRole.ts';
+import { collection, addDoc, getDocs, doc, setDoc } from 'firebase/firestore';
 import { db } from '../firebase/config.ts';
 import Toast from './Toast.tsx';
 import './HRRegistrationModal.css';
@@ -21,12 +21,20 @@ interface EmailRolePair {
 }
 
 const HRRegistrationModal: React.FC<HRRegistrationModalProps> = ({ onClose }) => {
-  const { theme } = useTheme();
+  const { companyName: adminCompanyName, isLoading: roleLoading } = useUserRole();
   const [emailRolePairs, setEmailRolePairs] = useState<EmailRolePair[]>([
     { id: '1', email: '', role: 'Manager', codeSent: false, verified: false, isVerifying: false }
   ]);
+  const [companyName, setCompanyName] = useState('');
   const [isSendingCodes, setIsSendingCodes] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+
+  // Auto-fill company name from admin's registration
+  useEffect(() => {
+    if (adminCompanyName && !roleLoading) {
+      setCompanyName(adminCompanyName);
+    }
+  }, [adminCompanyName, roleLoading]);
 
   const userRoles = [
     'Manager',
@@ -45,6 +53,7 @@ const HRRegistrationModal: React.FC<HRRegistrationModalProps> = ({ onClose }) =>
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     return emailRegex.test(email);
   };
+
 
   const generateVerificationCode = (): string => {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -119,6 +128,12 @@ const HRRegistrationModal: React.FC<HRRegistrationModalProps> = ({ onClose }) =>
       return;
     }
 
+    // Validate company name
+    if (!companyName.trim()) {
+      setToast({ message: 'Please enter a company name.', type: 'error' });
+      return;
+    }
+
     // Check for duplicates in database
     for (const pair of emailRolePairs) {
       const isDuplicate = await checkDuplicateEmail(pair.email);
@@ -129,43 +144,72 @@ const HRRegistrationModal: React.FC<HRRegistrationModalProps> = ({ onClose }) =>
     }
 
     setIsSendingCodes(true);
-    const tempCodes: { [key: string]: string } = {};
 
     try {
       // Send verification code for each email
       for (const pair of emailRolePairs) {
-        const code = generateVerificationCode();
         const emailLower = pair.email.trim().toLowerCase();
         
-        // Store verification code in Firestore
-        const verificationRef = doc(db, 'verificationCodes', emailLower);
-        const finalRole = pair.role === 'Others' ? (pair.customRole || 'Others') : pair.role;
-        await setDoc(verificationRef, {
-          code: code,
-          email: emailLower,
-          role: 'hr',
-          hrRole: finalRole,
-          createdAt: new Date().toISOString(),
-          expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString() // 10 minutes
-        });
+        try {
+          // Generate verification code
+          const code = generateVerificationCode();
+          const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+          const finalRole = pair.role === 'Others' ? (pair.customRole || 'Others') : pair.role;
+          
+          // Store verification code in Firestore first
+          const verificationRef = doc(db, 'verificationCodes', emailLower);
+          await setDoc(verificationRef, {
+            code: code,
+            email: emailLower,
+            role: 'hr',
+            hrRole: finalRole,
+            createdAt: new Date().toISOString(),
+            expiresAt: expiresAt.toISOString()
+          });
 
-        tempCodes[pair.id] = code;
+          // Try to send via backend API (may fail if user doesn't exist, but that's OK)
+          try {
+            const response = await fetch('http://localhost:5000/api/auth/resend-verification', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                email: emailLower,
+                code: code // Pass the code to backend if it supports it
+              })
+            });
 
-        // Update pair to show code sent
-        setEmailRolePairs(prevPairs =>
-          prevPairs.map(p =>
-            p.id === pair.id
-              ? { ...p, codeSent: true, verificationCode: code }
-              : p
-          )
-        );
+            const data = await response.json();
+            if (response.ok && data.success) {
+              // Backend sent the email successfully
+            } else {
+              // Backend may not support sending without user existing, but code is stored in Firestore
+              console.log(`Backend email send may have failed for ${pair.email}, but code stored in Firestore`);
+            }
+          } catch (backendError) {
+            // Backend unavailable or doesn't support this, but code is stored in Firestore
+            console.log(`Backend email send failed for ${pair.email}, but code stored in Firestore`);
+          }
+
+          // Update pair to show code sent
+          setEmailRolePairs(prevPairs =>
+            prevPairs.map(p =>
+              p.id === pair.id
+                ? { ...p, codeSent: true }
+                : p
+            )
+          );
+        } catch (error: any) {
+          console.error(`Error processing code for ${pair.email}:`, error);
+          setToast({ message: `Failed to process code for ${pair.email}. Please try again.`, type: 'error' });
+          setIsSendingCodes(false);
+          return;
+        }
       }
 
-      // Store codes temporarily
-      (window as any).__tempVerificationCodes = tempCodes;
-
       setToast({
-        message: `Verification codes generated for ${emailRolePairs.length} email(s)!`,
+        message: `Verification codes sent to ${emailRolePairs.length} email(s)! Please check your email inboxes.`,
         type: 'success'
       });
     } catch (error: any) {
@@ -196,37 +240,23 @@ const HRRegistrationModal: React.FC<HRRegistrationModalProps> = ({ onClose }) =>
     try {
       const emailLower = pair.email.trim().toLowerCase();
       
-      // Check verification code
-      const verificationRef = doc(db, 'verificationCodes', emailLower);
-      const verificationDoc = await getDoc(verificationRef);
-      
-      if (!verificationDoc.exists()) {
-        setToast({ message: `Verification code expired or invalid for ${pair.email}.`, type: 'error' });
-        setEmailRolePairs(prevPairs =>
-          prevPairs.map(p =>
-            p.id === pairId ? { ...p, isVerifying: false } : p
-          )
-        );
-        return;
-      }
+      // Verify code via backend API
+      const response = await fetch('http://localhost:5000/api/auth/verify-email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: emailLower,
+          code: code.trim()
+        })
+      });
 
-      const verificationData = verificationDoc.data();
-      const now = new Date();
-      const expiresAt = new Date(verificationData.expiresAt);
+      const data = await response.json();
 
-      if (now > expiresAt) {
-        setToast({ message: `Verification code has expired for ${pair.email}.`, type: 'error' });
-        await deleteDoc(verificationRef);
-        setEmailRolePairs(prevPairs =>
-          prevPairs.map(p =>
-            p.id === pairId ? { ...p, isVerifying: false } : p
-          )
-        );
-        return;
-      }
-
-      if (verificationData.code !== code.trim()) {
-        setToast({ message: `Invalid verification code for ${pair.email}.`, type: 'error' });
+      if (!response.ok || !data.success) {
+        const errorMessage = data.message || data.error || `Invalid verification code for ${pair.email}.`;
+        setToast({ message: errorMessage, type: 'error' });
         setEmailRolePairs(prevPairs =>
           prevPairs.map(p =>
             p.id === pairId ? { ...p, isVerifying: false } : p
@@ -239,7 +269,6 @@ const HRRegistrationModal: React.FC<HRRegistrationModalProps> = ({ onClose }) =>
       const isDuplicate = await checkDuplicateEmail(pair.email);
       if (isDuplicate) {
         setToast({ message: `${pair.email} is already registered.`, type: 'error' });
-        await deleteDoc(verificationRef);
         setEmailRolePairs(prevPairs =>
           prevPairs.map(p =>
             p.id === pairId ? { ...p, isVerifying: false } : p
@@ -248,18 +277,16 @@ const HRRegistrationModal: React.FC<HRRegistrationModalProps> = ({ onClose }) =>
         return;
       }
 
-      // Register the email
+      // Register the email with company name
       const finalRole = pair.role === 'Others' ? (pair.customRole || 'Others') : pair.role;
       await addDoc(collection(db, 'userEmails'), {
         email: emailLower,
         role: 'hr',
         hrRole: finalRole,
+        companyName: companyName.trim(),
         createdAt: new Date().toISOString(),
         verified: true
       });
-
-      // Delete verification code
-      await deleteDoc(verificationRef);
 
       // Update pair to show verified
       setEmailRolePairs(prevPairs =>
@@ -306,28 +333,47 @@ const HRRegistrationModal: React.FC<HRRegistrationModalProps> = ({ onClose }) =>
     try {
       const code = generateVerificationCode();
       const emailLower = pair.email.trim().toLowerCase();
-      
-      const verificationRef = doc(db, 'verificationCodes', emailLower);
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
       const finalRole = pair.role === 'Others' ? (pair.customRole || 'Others') : pair.role;
+      
+      // Store verification code in Firestore first
+      const verificationRef = doc(db, 'verificationCodes', emailLower);
       await setDoc(verificationRef, {
         code: code,
         email: emailLower,
         role: 'hr',
         hrRole: finalRole,
         createdAt: new Date().toISOString(),
-        expiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString()
+        expiresAt: expiresAt.toISOString()
       });
 
-      setEmailRolePairs(prevPairs =>
-        prevPairs.map(p =>
-          p.id === pairId
-            ? { ...p, verificationCode: code, codeSent: true }
-            : p
-        )
-      );
+      // Try to send via backend API
+      try {
+        const response = await fetch('http://localhost:5000/api/auth/resend-verification', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: emailLower,
+            code: code // Pass the code to backend if it supports it
+          })
+        });
+
+        const data = await response.json();
+        if (response.ok && data.success) {
+          // Backend sent the email successfully
+        } else {
+          // Backend may not support sending without user existing, but code is stored in Firestore
+          console.log(`Backend email resend may have failed for ${pair.email}, but code stored in Firestore`);
+        }
+      } catch (backendError) {
+        // Backend unavailable or doesn't support this, but code is stored in Firestore
+        console.log(`Backend email resend failed for ${pair.email}, but code stored in Firestore`);
+      }
 
       setToast({
-        message: `Verification code resent to ${pair.email}`,
+        message: `Verification code resent to ${pair.email}. Please check your email inbox.`,
         type: 'success'
       });
     } catch (error: any) {
@@ -340,8 +386,8 @@ const HRRegistrationModal: React.FC<HRRegistrationModalProps> = ({ onClose }) =>
   const hasCodeSent = emailRolePairs.some(pair => pair.codeSent);
 
   return (
-    <div className={`hr-modal-overlay theme-${theme}`} onClick={onClose}>
-      <div className="hr-modal-content hr-modal-content-large" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="hr-modal-content hr-modal-content-large bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="hr-modal-header">
           <div className="hr-header-icon">👔</div>
           <h2>User Registration</h2>
@@ -352,6 +398,26 @@ const HRRegistrationModal: React.FC<HRRegistrationModalProps> = ({ onClose }) =>
           <p className="hr-description">
             Register multiple email addresses with their specific roles. Each email will receive a separate verification code.
           </p>
+
+          {/* Company Name Input */}
+          <div className="form-group company-name-group">
+            <label className="form-label">Company Name *</label>
+            <input
+              type="text"
+              value={companyName}
+              onChange={(e) => setCompanyName(e.target.value)}
+              className="form-input"
+              placeholder={roleLoading ? "Loading..." : "e.g., Tech Corp"}
+              disabled={isSendingCodes || hasCodeSent || !!adminCompanyName}
+              required
+              title={adminCompanyName ? "Company name is set from your registration" : ""}
+            />
+            <small className="form-hint">
+              {adminCompanyName 
+                ? "Company name is automatically set from your registration. All emails registered here will belong to this company."
+                : "All emails registered here will belong to this company."}
+            </small>
+          </div>
 
           {/* Email/Role Pairs */}
           <div className="email-pairs-container">
@@ -419,56 +485,48 @@ const HRRegistrationModal: React.FC<HRRegistrationModalProps> = ({ onClose }) =>
                   </div>
                 )}
 
-                {/* Verification Code Display */}
-                {pair.codeSent && pair.verificationCode && !pair.verified && (
-                  <div className="verification-code-display-small">
-                    <p className="code-label-small">Code for {pair.email}:</p>
-                    <div className="code-box-small">
-                      {pair.verificationCode}
-                    </div>
-                  </div>
-                )}
 
                 {/* Verification Input */}
                 {pair.codeSent && !pair.verified && (
                   <div className="verification-section">
                     <div className="form-group">
                       <label className="form-label">Verification Code</label>
-                      <div className="verification-input-group">
-                        <input
-                          type="text"
-                          value={pair.verificationCode || ''}
-                          onChange={(e) => {
-                            const code = e.target.value.replace(/\D/g, '').slice(0, 6);
-                            setEmailRolePairs(prevPairs =>
-                              prevPairs.map(p =>
-                                p.id === pair.id ? { ...p, verificationCode: code } : p
-                              )
-                            );
-                          }}
-                          className="form-input verification-code-input-small"
-                          placeholder="000000"
-                          disabled={pair.isVerifying || pair.verified}
-                          maxLength={6}
-                          required
-                        />
-                        <button
-                          type="button"
-                          className="verify-btn"
-                          onClick={() => pair.verificationCode && verifyAndRegisterEmail(pair.id, pair.verificationCode)}
-                          disabled={pair.isVerifying || pair.verified || !pair.verificationCode || pair.verificationCode.length !== 6}
-                        >
-                          {pair.isVerifying ? 'Verifying...' : pair.verified ? '✓ Verified' : 'Verify'}
-                        </button>
-                        <button
-                          type="button"
-                          className="resend-code-btn-small"
-                          onClick={() => resendCodeForEmail(pair.id)}
-                          disabled={pair.isVerifying || pair.verified}
-                        >
-                          Resend
-                        </button>
-                      </div>
+                      <input
+                        type="text"
+                        value={pair.verificationCode || ''}
+                        onChange={(e) => {
+                          const code = e.target.value.replace(/\D/g, '').slice(0, 6);
+                          setEmailRolePairs(prevPairs =>
+                            prevPairs.map(p =>
+                              p.id === pair.id ? { ...p, verificationCode: code } : p
+                            )
+                          );
+                        }}
+                        className="form-input verification-code-input"
+                        placeholder="000000"
+                        disabled={pair.isVerifying || pair.verified}
+                        maxLength={6}
+                        required
+                        autoFocus
+                      />
+                      <button
+                        type="button"
+                        className="resend-code-btn"
+                        onClick={() => resendCodeForEmail(pair.id)}
+                        disabled={pair.isVerifying || pair.verified || isSendingCodes}
+                      >
+                        {isSendingCodes ? 'Sending...' : 'Resend Code'}
+                      </button>
+                    </div>
+                    <div className="form-actions">
+                      <button
+                        type="button"
+                        className="verify-btn-full"
+                        onClick={() => pair.verificationCode && verifyAndRegisterEmail(pair.id, pair.verificationCode)}
+                        disabled={pair.isVerifying || pair.verified || !pair.verificationCode || pair.verificationCode.length !== 6}
+                      >
+                        {pair.isVerifying ? 'Verifying...' : pair.verified ? '✓ Verified' : 'Verify & Register'}
+                      </button>
                     </div>
                   </div>
                 )}
@@ -510,7 +568,7 @@ const HRRegistrationModal: React.FC<HRRegistrationModalProps> = ({ onClose }) =>
                 type="button"
                 className="submit-btn"
                 onClick={sendVerificationCodes}
-                disabled={isSendingCodes || emailRolePairs.some(p => 
+                disabled={isSendingCodes || !companyName.trim() || emailRolePairs.some(p => 
                   !p.email.trim() || 
                   !validateEmail(p.email) ||
                   (p.role === 'Others' && (!p.customRole || !p.customRole.trim()))

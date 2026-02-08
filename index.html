@@ -14,6 +14,24 @@
 		<title>Verified Resumes Client UI</title>
 	</head>
 	<body>
+		<script>
+			// Apply theme immediately before React renders to prevent flash
+			(function() {
+				const savedTheme = localStorage.getItem('theme');
+				const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+				const theme = savedTheme === 'dark' || savedTheme === 'light' 
+					? savedTheme 
+					: (prefersDark ? 'dark' : 'light');
+				
+				if (theme === 'dark') {
+					document.documentElement.classList.add('dark');
+					document.documentElement.classList.remove('light');
+				} else {
+					document.documentElement.classList.remove('dark');
+					document.documentElement.classList.add('light');
+				}
+			})();
+		</script>
 		<noscript>You need to enable JavaScript to run this app.</noscript>
 		<div id="root"></div>
 		<script type="module" src="/src/index.tsx"></script>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useTheme } from '../contexts/ThemeContext.tsx';
+import { useUserRole } from '../hooks/useUserRole.ts';
 import { User } from 'firebase/auth';
 import Toast from './Toast.tsx';
 import './ProfileModal.css';
@@ -17,7 +17,7 @@ interface ProfileModalProps {
 }
 
 const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose }) => {
-  const { theme } = useTheme();
+  const { companyName: registeredCompanyName, isLoading: roleLoading } = useUserRole();
   const [profileData, setProfileData] = useState<ProfileData>({
     name: user.displayName || '',
     about: '',
@@ -32,15 +32,22 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose }) => {
   useEffect(() => {
     // Load saved profile data
     const savedProfile = localStorage.getItem('userProfile');
+    let loadedCompany = '';
+    
     if (savedProfile) {
       const parsed = JSON.parse(savedProfile);
-      setProfileData({
-        name: parsed.name || user.displayName || '',
-        about: parsed.about || '',
-        company: parsed.company || '',
-        birthday: parsed.birthday || ''
-      });
+      loadedCompany = parsed.company || '';
     }
+    
+    // Use registered company name if available, otherwise use saved profile company
+    const companyToUse = registeredCompanyName || loadedCompany;
+    
+    setProfileData(prev => ({
+      name: savedProfile ? JSON.parse(savedProfile).name || user.displayName || '' : user.displayName || '',
+      about: savedProfile ? JSON.parse(savedProfile).about || '' : prev.about,
+      company: companyToUse || prev.company,
+      birthday: savedProfile ? JSON.parse(savedProfile).birthday || '' : prev.birthday
+    }));
 
     // Calculate time in app
     const userData = localStorage.getItem('userData');
@@ -67,7 +74,7 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose }) => {
     // Count jobs applied
     const applications = JSON.parse(localStorage.getItem('applications') || '[]');
     setJobsAppliedCount(applications.length);
-  }, [user]);
+  }, [user, registeredCompanyName]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -99,8 +106,8 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose }) => {
   };
 
   return (
-    <div className={`profile-modal-overlay theme-${theme}`} onClick={onClose}>
-      <div className="profile-modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className="profile-modal-overlay fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="profile-modal-content bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="profile-modal-header">
           <h2>Profile</h2>
           <button className="close-btn" onClick={onClose}>×</button>
@@ -154,14 +161,23 @@ const ProfileModal: React.FC<ProfileModalProps> = ({ user, onClose }) => {
             <div className="form-group">
               <label className="form-label">Company</label>
               {isEditing ? (
-                <input
-                  type="text"
-                  name="company"
-                  value={profileData.company}
-                  onChange={handleInputChange}
-                  className="form-input"
-                  placeholder="Enter company name"
-                />
+                <>
+                  <input
+                    type="text"
+                    name="company"
+                    value={profileData.company}
+                    onChange={handleInputChange}
+                    className="form-input"
+                    placeholder={roleLoading ? "Loading..." : registeredCompanyName ? "Company name from registration" : "Enter company name"}
+                    disabled={!!registeredCompanyName}
+                    title={registeredCompanyName ? "Company name is set from your registration" : ""}
+                  />
+                  {registeredCompanyName && (
+                    <small className="form-hint" style={{ marginTop: '4px', display: 'block', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                      Company name is automatically set from your registration
+                    </small>
+                  )}
+                </>
               ) : (
                 <div className="form-display">{profileData.company || 'Not set'}</div>
               )}

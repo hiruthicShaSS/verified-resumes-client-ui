@@ -80,7 +80,7 @@
   box-shadow: 0 4px 12px var(--shadow-color);
 }
 
-/* Cancel Link Button */
+/* Cancel Link Button (Home Icon) */
 .cancel-link {
   background: var(--bg-tertiary);
   backdrop-filter: blur(10px);
@@ -94,6 +94,9 @@
   text-decoration: none;
   transition: all 0.3s ease;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .cancel-link:hover {
@@ -121,9 +124,16 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   transition: all 0.3s ease;
   overflow: hidden;
+  justify-content: center;
 }
 
-. tab {
+/* Center tabs when there are only 2 tabs */
+.tabs-container:has(.tab:nth-child(2):last-child) {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.tab {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -142,6 +152,14 @@
   min-width: 160px;
   line-height: 1.2;
   text-align: center;
+}
+
+.dark .tab {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.light .tab {
+  color: rgba(0, 0, 0, 0.6);
 }
 
 .tab-label {
@@ -173,6 +191,16 @@
   background: rgba(255, 255, 255, 0.06);
 }
 
+.dark .tab.active {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.light .tab.active {
+  color: #1e293b;
+  background: rgba(255, 255, 255, 0.95);
+}
+
 .tab.active::after {
   content: '';
   position: absolute;
@@ -182,11 +210,6 @@
   height: 3px;
   background: #3b82f6;
   box-shadow: 0 -1px 10px rgba(59, 130, 246, 0.5);
-}
-
-.theme-light .tab.active {
-  color: #1e293b;
-  background: rgba(255, 255, 255, 0.95);
 }
 
 .tab-checkmark {
@@ -226,6 +249,16 @@
   color: #ffffff;
   border-color: rgba(255, 255, 255, 0.1);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark .tab.active .tab-number {
+  background: #111827;
+  color: #ffffff;
+}
+
+.light .tab.active .tab-number {
+  background: #3b82f6;
+  color: #ffffff;
 }
 
 .tab.completed .tab-number {
@@ -444,6 +477,62 @@
   gap: 12px;
   font-size: 14px;
   color: var(--text-tertiary);
+}
+
+.parsed-badge {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.dark .parsed-badge {
+  background: rgba(16, 185, 129, 0.2);
+}
+
+.light .parsed-badge {
+  background: rgba(16, 185, 129, 0.15);
+}
+
+/* Parsed Resume Preview */
+.parsed-resume-preview {
+  margin-top: 12px;
+  padding: 16px;
+  background: rgba(59, 130, 246, 0.03);
+  border: 1px solid rgba(59, 130, 246, 0.15);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.dark .parsed-resume-preview {
+  background: rgba(59, 130, 246, 0.05);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.preview-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0 0 12px 0;
+}
+
+.preview-companies,
+.preview-skills,
+.preview-education {
+  margin: 8px 0;
+  color: var(--text-secondary);
+}
+
+.preview-companies ul {
+  margin: 4px 0 0 16px;
+  padding: 0;
+}
+
+.preview-companies li {
+  margin: 4px 0;
+  font-size: 12px;
 }
 
 .file-type {

@@ -8,7 +8,7 @@
   filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
 }
 
-.theme-light .ghost-container {
+.light .ghost-container {
   filter: drop-shadow(0 0 8px rgba(0, 0, 0, 0.2));
 }
 
@@ -32,12 +32,12 @@
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
-.theme-dark .ghost-head {
+.dark .ghost-head {
   background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
 }
 
-.theme-light .ghost-head {
+.light .ghost-head {
   background: rgba(240, 240, 240, 0.95);
   box-shadow: 0 0 10px rgba(200, 200, 200, 0.4);
 }
@@ -73,10 +73,15 @@
 }
 
 @keyframes blink {
-  0%, 90%, 100% {
+
+  0%,
+  90%,
+  100% {
     height: 10px;
   }
-  92%, 94% {
+
+  92%,
+  94% {
     height: 2px;
     top: 18px;
   }
@@ -97,9 +102,12 @@
 }
 
 @keyframes mouthMove {
-  0%, 100% {
+
+  0%,
+  100% {
     width: 12px;
   }
+
   50% {
     width: 14px;
   }
@@ -115,28 +123,26 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
-  clip-path: polygon(
-    0% 0%,
-    100% 0%,
-    100% 70%,
-    90% 80%,
-    75% 70%,
-    60% 85%,
-    45% 70%,
-    30% 80%,
-    15% 75%,
-    0% 85%
-  );
+  clip-path: polygon(0% 0%,
+      100% 0%,
+      100% 70%,
+      90% 80%,
+      75% 70%,
+      60% 85%,
+      45% 70%,
+      30% 80%,
+      15% 75%,
+      0% 85%);
   box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
   animation: float 2s ease-in-out infinite;
 }
 
-.theme-dark .ghost-body-main {
+.dark .ghost-body-main {
   background: rgba(255, 255, 255, 0.95);
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.6);
 }
 
-.theme-light .ghost-body-main {
+.light .ghost-body-main {
   background: rgba(240, 240, 240, 0.95);
   box-shadow: 0 0 10px rgba(200, 200, 200, 0.4);
 }
@@ -168,18 +174,24 @@
 }
 
 @keyframes wave {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateX(0) scaleY(1);
   }
+
   50% {
     transform: translateX(2px) scaleY(0.8);
   }
 }
 
 @keyframes float {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateX(-50%) translateY(0);
   }
+
   50% {
     transform: translateX(-50%) translateY(-3px);
   }
@@ -201,21 +213,23 @@
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.5;
     transform: translate(-50%, -50%) scale(1);
   }
+
   50% {
     opacity: 0.8;
     transform: translate(-50%, -50%) scale(1.1);
   }
 }
 
-.theme-dark .ghost-container::before {
+.dark .ghost-container::before {
   background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
 }
 
-.theme-light .ghost-container::before {
+.light .ghost-container::before {
   background: radial-gradient(circle, rgba(200, 200, 200, 0.2) 0%, transparent 70%);
 }
-

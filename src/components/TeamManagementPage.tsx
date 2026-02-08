@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../contexts/ThemeContext.tsx';
 import { useAuth } from '../contexts/AuthContext.tsx';
+import { useUserRole } from '../hooks/useUserRole.ts';
 import { collection, getDocs, addDoc, updateDoc, deleteDoc, doc, query, where } from 'firebase/firestore';
 import { db } from '../firebase/config.ts';
 import Header from './Header.tsx';
+import { Background } from './Background.tsx';
 import Toast from './Toast.tsx';
 import './TeamManagementPage.css';
 
@@ -21,8 +22,8 @@ type TabType = 'members';
 
 const TeamManagementPage: React.FC = () => {
   const navigate = useNavigate();
-  const { theme } = useTheme();
   const { user } = useAuth();
+  const { isAdmin, userRole, companyName } = useUserRole();
   const [members, setMembers] = useState<Member[]>([]);
   const [filteredMembers, setFilteredMembers] = useState<Member[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -30,36 +31,11 @@ const TeamManagementPage: React.FC = () => {
   const [sortField, setSortField] = useState<'name' | 'email' | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [isLoading, setIsLoading] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   useEffect(() => {
     loadMembers();
-    checkAdminStatus();
-  }, [user]);
-
-  const checkAdminStatus = async () => {
-    if (!user?.email) {
-      setIsAdmin(false);
-      return;
-    }
-
-    try {
-      const emailsRef = collection(db, 'userEmails');
-      const querySnapshot = await getDocs(emailsRef);
-      const userEmail = user.email.toLowerCase();
-      
-      const isUserAdmin = querySnapshot.docs.some(doc => {
-        const data = doc.data();
-        return data.email.toLowerCase() === userEmail && data.role === 'admin';
-      });
-      
-      setIsAdmin(isUserAdmin);
-    } catch (error) {
-      console.error('Error checking admin status:', error);
-      setIsAdmin(false);
-    }
-  };
+  }, [user, companyName]);
 
   useEffect(() => {
     applyFilters();
@@ -68,56 +44,76 @@ const TeamManagementPage: React.FC = () => {
   const loadMembers = async () => {
     setIsLoading(true);
     try {
+      if (!companyName) {
+        setToast({ message: 'Company name not found. Please ensure you are registered with a company.', type: 'error' });
+        setIsLoading(false);
+        return;
+      }
+
       // Load from userEmails collection (from registration modals)
+      // Filter by company name to only show members from the user's company
       const userEmailsRef = collection(db, 'userEmails');
       const userEmailsSnapshot = await getDocs(userEmailsRef);
       const membersData: Member[] = [];
       
       userEmailsSnapshot.forEach((doc) => {
         const data = doc.data();
-        // Convert userEmails format to Member format
-        membersData.push({
-          id: doc.id,
-          name: data.email.split('@')[0], // Use email prefix as name
-          email: data.email,
-          role: data.role ? [
-            data.role === 'admin' 
-              ? 'Admin' 
-              : (data.hrRole || 'HR')
-          ] : [],
-          createdAt: data.createdAt
-        });
+        // Only include members from the same company
+        const memberCompanyName = (data.companyName || '').trim().toLowerCase();
+        const userCompanyName = companyName.trim().toLowerCase();
+        
+        if (memberCompanyName === userCompanyName) {
+          // Convert userEmails format to Member format
+          membersData.push({
+            id: doc.id,
+            name: data.email.split('@')[0], // Use email prefix as name
+            email: data.email,
+            role: data.role ? [
+              data.role === 'admin' 
+                ? 'Admin' 
+                : (data.hrRole || 'HR')
+            ] : [],
+            createdAt: data.createdAt
+          });
+        }
       });
 
       // Also load from members collection if it exists
       try {
         const membersRef = collection(db, 'members');
         const membersSnapshot = await getDocs(membersRef);
-            membersSnapshot.forEach((doc) => {
+        const userCompanyName = companyName.trim().toLowerCase();
+        
+        membersSnapshot.forEach((doc) => {
           const data = doc.data();
-          // Check if member already exists (by email)
-          const existingIndex = membersData.findIndex(m => m.email === data.email);
-          if (existingIndex >= 0) {
-            // Merge data
-            const existingRole = membersData[existingIndex].role;
-            const newRole = data.role 
-              ? [data.role === 'admin' ? 'Admin' : (data.hrRole || 'HR')]
-              : existingRole;
-            membersData[existingIndex] = {
-              ...membersData[existingIndex],
-              ...data,
-              id: doc.id,
-              role: newRole
-            };
-          } else {
-            const roleArray = data.role 
-              ? [data.role === 'admin' ? 'Admin' : (data.hrRole || 'HR')]
-              : [];
-            membersData.push({ 
-              id: doc.id, 
-              ...data,
-              role: roleArray
-            } as Member);
+          // Only include members from the same company
+          const memberCompanyName = (data.companyName || '').trim().toLowerCase();
+          
+          if (memberCompanyName === userCompanyName) {
+            // Check if member already exists (by email)
+            const existingIndex = membersData.findIndex(m => m.email === data.email);
+            if (existingIndex >= 0) {
+              // Merge data
+              const existingRole = membersData[existingIndex].role;
+              const newRole = data.role 
+                ? [data.role === 'admin' ? 'Admin' : (data.hrRole || 'HR')]
+                : existingRole;
+              membersData[existingIndex] = {
+                ...membersData[existingIndex],
+                ...data,
+                id: doc.id,
+                role: newRole
+              };
+            } else {
+              const roleArray = data.role 
+                ? [data.role === 'admin' ? 'Admin' : (data.hrRole || 'HR')]
+                : [];
+              membersData.push({ 
+                id: doc.id, 
+                ...data,
+                role: roleArray
+              } as Member);
+            }
           }
         });
       } catch (err) {
@@ -211,7 +207,8 @@ const TeamManagementPage: React.FC = () => {
 
 
   return (
-    <div className={`team-management-page theme-${theme}`}>
+    <div className="team-management-page-wrapper min-h-screen bg-slate-50 dark:bg-slate-950 relative transition-colors duration-300">
+      <Background />
       <Header showLogout={true} onBack={() => navigate('/home')} />
       
       <div className="team-management-container">
@@ -304,39 +301,62 @@ const TeamManagementPage: React.FC = () => {
                         </td>
                       </tr>
                     ) : (
-                      filteredMembers.map((member) => (
-                        <tr key={member.id}>
-                          <td className="name-cell">{member.name}</td>
-                          <td className="email-cell">{member.email}</td>
-                          <td className="role-cell">
-                            {member.role && member.role.length > 0 ? (
-                              <div className="role-badges">
-                                {member.role.map((role, index) => (
-                                  <span
-                                    key={index}
-                                    className={`role-badge ${role.toLowerCase() === 'admin' ? 'admin-badge' : 'role-badge-default'}`}
-                                  >
-                                    {role}
-                                  </span>
-                                ))}
-                              </div>
-                            ) : (
-                              <span className="empty-value">—</span>
-                            )}
-                          </td>
-                          {isAdmin && (
-                            <td className="actions-cell">
-                              <button
-                                className="delete-member-btn"
-                                onClick={() => member.id && handleDeleteMember(member.id, member.email)}
-                                title="Delete member"
-                              >
-                                🗑️ Delete
-                              </button>
+                      filteredMembers.map((member) => {
+                        const isCurrentUser = user?.email?.toLowerCase() === member.email.toLowerCase();
+                        return (
+                          <tr 
+                            key={member.id}
+                            className={isCurrentUser ? 'current-user-row' : ''}
+                          >
+                            <td className="name-cell">
+                              {member.name}
+                              {isCurrentUser && (
+                                <span className="you-badge" title="This is you"> (You)</span>
+                              )}
                             </td>
-                          )}
-                        </tr>
-                      ))
+                            <td className="email-cell">{member.email}</td>
+                            <td className="role-cell">
+                              {member.role && member.role.length > 0 ? (
+                                <div className="role-badges">
+                                  {member.role.map((role, index) => (
+                                    <span
+                                      key={index}
+                                      className={`role-badge ${role.toLowerCase() === 'admin' ? 'admin-badge' : 'role-badge-default'}`}
+                                    >
+                                      {role}
+                                    </span>
+                                  ))}
+                                  {isCurrentUser && isAdmin && (
+                                    <span className="role-badge admin-badge current-user-admin-badge" title="You are an admin">
+                                      👑 Admin
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="empty-value">—</span>
+                              )}
+                            </td>
+                            {isAdmin && (
+                              <td className="actions-cell">
+                                {!isCurrentUser && (
+                                  <button
+                                    className="delete-member-btn"
+                                    onClick={() => member.id && handleDeleteMember(member.id, member.email)}
+                                    title="Delete member"
+                                  >
+                                    🗑️ Delete
+                                  </button>
+                                )}
+                                {isCurrentUser && (
+                                  <span className="current-user-indicator" title="You cannot delete yourself">
+                                    —
+                                  </span>
+                                )}
+                              </td>
+                            )}
+                          </tr>
+                        );
+                      })
                     )}
                   </tbody>
                 </table>

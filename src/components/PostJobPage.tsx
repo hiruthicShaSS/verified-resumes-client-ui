@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTheme } from '../contexts/ThemeContext.tsx';
+import { useUserRole } from '../hooks/useUserRole.ts';
 import Header from './Header.tsx';
+import { Background } from './Background.tsx';
 import './common.css';
 import './PostJobPage.css';
 import Toast from './Toast.tsx';
@@ -9,6 +10,7 @@ import Toast from './Toast.tsx';
 interface JobPostData {
   companyName: string;
   role: string;
+  jobType: string;
   aboutJob: string;
   companyOverview: string;
   jobDescription: string;
@@ -18,10 +20,11 @@ interface JobPostData {
 
 const PostJobPage: React.FC = () => {
   const navigate = useNavigate();
-  const { theme } = useTheme();
+  const { companyName: registeredCompanyName, isLoading: roleLoading } = useUserRole();
   const [formData, setFormData] = useState<JobPostData>({
     companyName: '',
     role: '',
+    jobType: 'Full-time',
     aboutJob: '',
     companyOverview: '',
     jobDescription: '',
@@ -30,8 +33,18 @@ const PostJobPage: React.FC = () => {
   });
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
+  // Auto-fill company name from registration
+  useEffect(() => {
+    if (registeredCompanyName && !roleLoading) {
+      setFormData(prev => ({
+        ...prev,
+        companyName: registeredCompanyName
+      }));
+    }
+  }, [registeredCompanyName, roleLoading]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
@@ -74,6 +87,7 @@ const PostJobPage: React.FC = () => {
   const isFormValid = () => {
     return formData.companyName.trim() !== '' &&
            formData.role.trim() !== '' &&
+           formData.jobType.trim() !== '' &&
            formData.aboutJob.trim() !== '' &&
            formData.companyOverview.trim() !== '' &&
            formData.jobDescription.trim() !== '' &&
@@ -90,13 +104,16 @@ const PostJobPage: React.FC = () => {
   };
 
   return (
-    <div className={`post-job-page-wrapper theme-${theme}`}>
+    <div className="post-job-page-wrapper min-h-screen bg-slate-50 dark:bg-slate-950 relative transition-colors duration-300">
+      <Background />
       {/* Header */}
       <header className="post-job-header-wrapper">
         <div className="post-job-header">
           <div className="header-left">
-            <button className="cancel-link" onClick={() => navigate('/home')}>
-              Cancel
+            <button className="cancel-link" onClick={() => navigate('/home')} title="Home">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
             </button>
           </div>
           <div className="header-center">
@@ -125,10 +142,17 @@ const PostJobPage: React.FC = () => {
                 type="text"
                 name="companyName"
                 className="form-input"
-                placeholder="Enter your company name..."
+                placeholder={roleLoading ? "Loading..." : "Enter your company name..."}
                 value={formData.companyName}
                 onChange={handleInputChange}
+                disabled={!!registeredCompanyName}
+                title={registeredCompanyName ? "Company name is set from your registration" : ""}
               />
+              {registeredCompanyName && (
+                <p className="form-hint" style={{ marginTop: '8px', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                  Company name is automatically set from your registration
+                </p>
+              )}
             </div>
 
             <div className="form-section">
@@ -141,6 +165,23 @@ const PostJobPage: React.FC = () => {
                 value={formData.role}
                 onChange={handleInputChange}
               />
+            </div>
+
+            <div className="form-section">
+              <h2 className="section-title">Job Type</h2>
+              <select
+                name="jobType"
+                className="form-input"
+                value={formData.jobType}
+                onChange={handleInputChange}
+              >
+                <option value="Full-time">Full-time</option>
+                <option value="Part-time">Part-time</option>
+                <option value="Contract">Contract</option>
+                <option value="Internship">Internship</option>
+                <option value="Temporary">Temporary</option>
+                <option value="Freelance">Freelance</option>
+              </select>
             </div>
 
             <div className="form-section">

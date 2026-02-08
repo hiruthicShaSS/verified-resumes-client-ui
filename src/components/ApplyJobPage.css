@@ -26,7 +26,7 @@
   background: var(--bg-primary);
 }
 
-.apply-job-page-wrapper.theme-light {
+.light .apply-job-page-wrapper {
   --bg-primary: #f5f7fa;
   --bg-secondary: rgba(255, 250, 245, 0.85);
   --bg-tertiary: rgba(255, 252, 250, 0.9);
@@ -126,7 +126,7 @@
   box-shadow: 0 4px 12px var(--shadow-color);
 }
 
-/* Cancel Link Button */
+/* Cancel Link Button (Home Icon) */
 .cancel-link {
   background: var(--bg-tertiary);
   backdrop-filter: blur(10px);
@@ -140,6 +140,9 @@
   text-decoration: none;
   transition: all 0.3s ease;
   font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .cancel-link:hover {
@@ -559,4 +562,3 @@
     font-size: 20px;
   }
 }
-

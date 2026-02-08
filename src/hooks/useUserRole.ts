@@ -1,7 +1,5 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext.tsx';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebase/config.ts';
 
 interface UserRoleInfo {
   isAdmin: boolean;
@@ -10,6 +8,7 @@ interface UserRoleInfo {
   companyName: string | null;
   isLoading: boolean;
   canViewApplicants: boolean;
+  canVerifyApplicants: boolean;
 }
 
 export const useUserRole = (): UserRoleInfo => {
@@ -20,7 +19,8 @@ export const useUserRole = (): UserRoleInfo => {
     userRole: null,
     companyName: null,
     isLoading: true,
-    canViewApplicants: false
+    canViewApplicants: false,
+    canVerifyApplicants: false
   });
 
   useEffect(() => {
@@ -32,75 +32,88 @@ export const useUserRole = (): UserRoleInfo => {
           userRole: null,
           companyName: null,
           isLoading: false,
-          canViewApplicants: false
+          canViewApplicants: false,
+          canVerifyApplicants: false
         });
         return;
       }
 
       try {
-        const emailsRef = collection(db, 'userEmails');
-        const querySnapshot = await getDocs(emailsRef);
         const userEmail = user.email.toLowerCase();
         
-        let isUserAdmin = false;
-        let isUserCompanyMember = false;
-        let userRole: string | null = null;
-        let companyName: string | null = null;
-        let canViewApplicants = false;
+        // Call backend API to get user role
+        const response = await fetch(
+          `http://localhost:5000/api/users/me/role?email=${encodeURIComponent(userEmail)}`,
+          {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error(`Failed to fetch user role: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+
+        if (!data.success) {
+          throw new Error(data.error || 'Failed to get user role');
+        }
 
         // Roles that can view applicants
         const allowedApplicantViewerRoles = [
           'admin',
+          'ADMIN',
           'Manager',
           'Recruiter',
           'Talent Acquisition',
           'HR'
         ];
 
-        querySnapshot.forEach((doc) => {
-          const data = doc.data();
-          const email = data.email.toLowerCase();
-          
-          if (email === userEmail) {
-            if (data.role === 'admin') {
-              isUserAdmin = true;
-              userRole = 'admin';
-              canViewApplicants = true;
-            } else if (data.role === 'hr') {
-              isUserCompanyMember = true;
-              const hrRole = data.hrRole || 'HR';
-              userRole = hrRole;
-              
-              // Check if the specific HR role is allowed to view applicants
-              canViewApplicants = allowedApplicantViewerRoles.includes(hrRole);
-            }
-            
-            // Extract company name from email domain (you can enhance this logic)
-            if (email.includes('@')) {
-              const domain = email.split('@')[1];
-              const domainParts = domain.split('.');
-              companyName = domainParts[0].charAt(0).toUpperCase() + domainParts[0].slice(1);
-            }
-          }
-        });
+        // Determine role information from API response
+        const role = data.role?.toLowerCase() || null;
+        const roleOriginal = data.role || null;
+        const isUserAdmin = role === 'admin';
+        const isUserCompanyMember = role !== null && role !== 'user' && !isUserAdmin;
+        
+        let canViewApplicants = false;
+        let canVerifyApplicants = false;
+
+        if (isUserAdmin) {
+          canViewApplicants = true;
+          canVerifyApplicants = true;
+        } else if (isUserCompanyMember) {
+          // For HR/company members, check if their role allows viewing applicants
+          const userRoleUpper = roleOriginal?.toUpperCase() || '';
+          canViewApplicants = allowedApplicantViewerRoles.some(
+            allowedRole => allowedRole.toUpperCase() === userRoleUpper
+          );
+          // Only Admin and HR can verify applicants (check for exact 'HR' role)
+          canVerifyApplicants = role === 'hr' || roleOriginal?.toUpperCase() === 'HR';
+        }
 
         setRoleInfo({
           isAdmin: isUserAdmin,
           isCompanyMember: isUserCompanyMember,
-          userRole,
-          companyName,
+          userRole: data.role || null,
+          companyName: data.companyName || null,
           isLoading: false,
-          canViewApplicants
+          canViewApplicants,
+          canVerifyApplicants
         });
       } catch (error) {
         console.error('Error checking user role:', error);
+        // Fallback: Set default values on error
         setRoleInfo({
           isAdmin: false,
           isCompanyMember: false,
           userRole: null,
           companyName: null,
           isLoading: false,
-          canViewApplicants: false
+          canViewApplicants: false,
+          canVerifyApplicants: false
         });
       }
     };

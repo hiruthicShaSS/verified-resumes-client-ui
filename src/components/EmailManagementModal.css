@@ -14,14 +14,14 @@
   padding: 20px;
 }
 
-.theme-dark .email-modal-overlay,
-.email-modal-overlay:not(.theme-light) {
+.dark .email-modal-overlay,
+.email-modal-overlay:not(.light) {
   background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(25px);
   -webkit-backdrop-filter: blur(25px);
 }
 
-.theme-light .email-modal-overlay {
+.light .email-modal-overlay {
   background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(15px);
   -webkit-backdrop-filter: blur(15px);
@@ -40,7 +40,7 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
 }
 
-.theme-light .email-modal-content {
+.light .email-modal-content {
   background: rgba(255, 250, 245, 0.95);
   border: 1px solid rgba(203, 213, 225, 0.5);
 }
@@ -53,7 +53,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.theme-light .email-modal-header {
+.light .email-modal-header {
   border-bottom: 1px solid rgba(203, 213, 225, 0.3);
 }
 
@@ -64,12 +64,12 @@
   color: rgba(255, 255, 255, 0.95);
 }
 
-.theme-dark .email-modal-header h2,
-.email-modal-overlay:not(.theme-light) .email-modal-header h2 {
+.dark .email-modal-header h2,
+.email-modal-overlay:not(.light) .email-modal-header h2 {
   color: rgba(255, 255, 255, 0.95);
 }
 
-.theme-light .email-modal-header h2 {
+.light .email-modal-header h2 {
   color: #2d3748;
 }
 
@@ -90,12 +90,12 @@
   line-height: 1;
 }
 
-.theme-dark .close-btn,
-.email-modal-overlay:not(.theme-light) .close-btn {
+.dark .close-btn,
+.email-modal-overlay:not(.light) .close-btn {
   color: rgba(255, 255, 255, 0.9);
 }
 
-.theme-light .close-btn {
+.light .close-btn {
   color: #4a5568;
 }
 
@@ -114,7 +114,7 @@
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.theme-light .add-email-section {
+.light .add-email-section {
   border-bottom: 1px solid rgba(203, 213, 225, 0.3);
 }
 
@@ -125,12 +125,12 @@
   color: rgba(255, 255, 255, 0.95);
 }
 
-.theme-dark .add-email-section h3,
-.email-modal-overlay:not(.theme-light) .add-email-section h3 {
+.dark .add-email-section h3,
+.email-modal-overlay:not(.light) .add-email-section h3 {
   color: rgba(255, 255, 255, 0.95);
 }
 
-.theme-light .add-email-section h3 {
+.light .add-email-section h3 {
   color: #2d3748;
 }
 
@@ -154,12 +154,12 @@
   margin-bottom: 8px;
 }
 
-.theme-dark .form-label,
-.email-modal-overlay:not(.theme-light) .form-label {
+.dark .form-label,
+.email-modal-overlay:not(.light) .form-label {
   color: rgba(255, 255, 255, 0.95);
 }
 
-.theme-light .form-label {
+.light .form-label {
   color: #4a5568;
 }
 
@@ -176,17 +176,17 @@
   transition: all 0.3s ease;
 }
 
-.theme-dark .form-input,
-.theme-dark .form-select,
-.email-modal-overlay:not(.theme-light) .form-input,
-.email-modal-overlay:not(.theme-light) .form-select {
+.dark .form-input,
+.dark .form-select,
+.email-modal-overlay:not(.light) .form-input,
+.email-modal-overlay:not(.light) .form-select {
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: rgba(255, 255, 255, 0.95);
 }
 
-.theme-light .form-input,
-.theme-light .form-select {
+.light .form-input,
+.light .form-select {
   background: rgba(255, 255, 255, 0.8);
   border: 1px solid rgba(203, 213, 225, 0.5);
   color: #2d3748;
@@ -456,4 +456,3 @@
     gap: 8px;
   }
 }
-

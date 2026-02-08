@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useTheme } from '../contexts/ThemeContext.tsx';
 import { collection, getDocs, addDoc, deleteDoc, doc, query, orderBy } from 'firebase/firestore';
 import { db } from '../firebase/config.ts';
 import Toast from './Toast.tsx';
@@ -16,7 +15,6 @@ interface EmailManagementModalProps {
 }
 
 const EmailManagementModal: React.FC<EmailManagementModalProps> = ({ onClose }) => {
-  const { theme } = useTheme();
   const [emails, setEmails] = useState<UserEmail[]>([]);
   const [newEmail, setNewEmail] = useState('');
   const [newRole, setNewRole] = useState<'admin' | 'hr'>('hr');
@@ -123,8 +121,8 @@ const EmailManagementModal: React.FC<EmailManagementModalProps> = ({ onClose }) 
   const hrEmails = emails.filter(e => e.role === 'hr');
 
   return (
-    <div className={`email-modal-overlay theme-${theme}`} onClick={onClose}>
-      <div className="email-modal-content" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/50 dark:bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={onClose}>
+      <div className="email-modal-content bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <div className="email-modal-header">
           <h2>Manage Admin & HR Emails</h2>
           <button className="close-btn" onClick={onClose}>×</button>

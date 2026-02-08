@@ -11,7 +11,7 @@
   background: linear-gradient(to bottom, #f8fafc 0%, #f1f5f9 100%);
 }
 
-.landing-page.theme-dark {
+.dark .landing-page {
   background: #000000;
 }
 
@@ -52,7 +52,7 @@
   min-height: 40px;
 }
 
-.landing-page.theme-dark .landing-theme-toggle {
+.dark .landing-page .landing-theme-toggle {
   background: #1e293b;
   border: 1px solid #334155;
   color: #cbd5e1;
@@ -63,7 +63,7 @@
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
-.landing-page.theme-dark .landing-theme-toggle:hover {
+.dark .landing-page .landing-theme-toggle:hover {
   background: #334155;
 }
 
@@ -96,7 +96,7 @@
   line-height: 1.1;
 }
 
-.landing-page.theme-dark .hero-title {
+.dark .landing-page .hero-title {
   color: #f8fafc;
 }
 
@@ -108,7 +108,7 @@
   font-weight: 400;
 }
 
-.landing-page.theme-dark .hero-subtitle {
+.dark .landing-page .hero-subtitle {
   color: #94a3b8;
 }
 
@@ -158,7 +158,7 @@
   text-align: center;
 }
 
-.landing-page.theme-dark .action-card {
+.dark .landing-page .action-card {
   background: #1e293b;
   border: 1px solid #334155;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
@@ -170,7 +170,7 @@
   transform: translateY(-2px);
 }
 
-.landing-page.theme-dark .action-card:hover {
+.dark .landing-page .action-card:hover {
   border-color: #3b82f6;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
@@ -187,7 +187,7 @@
   color: #3b82f6;
 }
 
-.landing-page.theme-dark .card-icon {
+.dark .landing-page .card-icon {
   background: #1e3a8a;
   color: #60a5fa;
 }
@@ -199,7 +199,7 @@
   margin: 0 0 8px 0;
 }
 
-.landing-page.theme-dark .card-title {
+.dark .landing-page .card-title {
   color: #f8fafc;
 }
 
@@ -210,7 +210,7 @@
   line-height: 1.5;
 }
 
-.landing-page.theme-dark .card-description {
+.dark .landing-page .card-description {
   color: #94a3b8;
 }
 
@@ -223,7 +223,7 @@
   max-width: 600px;
 }
 
-.landing-page.theme-dark .registration-footer {
+.dark .landing-page .registration-footer {
   border-top-color: #334155;
 }
 
@@ -236,7 +236,7 @@
   font-weight: 500;
 }
 
-.landing-page.theme-dark .footer-label {
+.dark .landing-page .footer-label {
   color: #64748b;
 }
 
@@ -268,7 +268,7 @@
   font-size: 14px;
 }
 
-.landing-page.theme-dark .separator {
+.dark .landing-page .separator {
   color: #475569;
 }
 

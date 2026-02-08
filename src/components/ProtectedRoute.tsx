@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext.tsx';
 
 interface ProtectedRouteProps {
@@ -7,7 +7,8 @@ interface ProtectedRouteProps {
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, emailVerified } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -37,6 +38,21 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   if (!user) {
     return <Navigate to="/" replace />;
+  }
+
+  // Allow access to verification page even if not verified
+  if (location.pathname === '/verify-email') {
+    return children;
+  }
+
+  // Check email verification status
+  // Check from localStorage first (updated by backend API)
+  const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+
+  // Redirect to verification if email not verified
+  // Only check if emailVerified is explicitly false (not null/undefined)
+  if (emailVerified === false || (userData.emailVerified === false && emailVerified !== true)) {
+    return <Navigate to="/verify-email" state={{ email: user.email }} replace />;
   }
 
   return children;

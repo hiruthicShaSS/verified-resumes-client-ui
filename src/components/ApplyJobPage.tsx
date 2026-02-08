@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useTheme } from '../contexts/ThemeContext.tsx';
+import { useAuth } from '../contexts/AuthContext.tsx';
 import Header from './Header.tsx';
+import { Background } from './Background.tsx';
 import './common.css';
 import './ApplyJobPage.css';
 import { FileIcon } from './Icons.tsx';
@@ -19,7 +20,7 @@ interface ApplicationData {
 const ApplyJobPage: React.FC = () => {
   const navigate = useNavigate();
   const { jobId } = useParams<{ jobId: string }>();
-  const { theme } = useTheme();
+  const { user } = useAuth();
   const [formData, setFormData] = useState<ApplicationData>({
     name: '',
     yearsOfExperience: '',
@@ -32,14 +33,22 @@ const ApplyJobPage: React.FC = () => {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
   useEffect(() => {
-    // Load uploaded resumes from localStorage
-    const savedFiles = JSON.parse(localStorage.getItem('uploadedFiles') || '[]');
+    // Load uploaded resumes from localStorage - user-specific key
+    if (!user?.email) {
+      setUploadedResumes([]);
+      return;
+    }
+
+    const userEmail = user.email.toLowerCase();
+    const storageKey = `uploadedFiles_${userEmail}`;
+    const savedFiles = JSON.parse(localStorage.getItem(storageKey) || '[]');
     setUploadedResumes(savedFiles);
+    
     // Set default selected resume to first one if available
     if (savedFiles.length > 0 && formData.selectedResumeIndex >= savedFiles.length) {
       setFormData(prev => ({ ...prev, selectedResumeIndex: 0 }));
     }
-  }, []);
+  }, [user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
@@ -63,16 +72,6 @@ const ApplyJobPage: React.FC = () => {
     const userData = JSON.parse(localStorage.getItem('userData') || '{}');
     
     try {
-      // Create FormData for file upload
-      const formDataToSend = new FormData();
-      formDataToSend.append('jobId', jobId);
-      formDataToSend.append('applicantName', formData.name);
-      formDataToSend.append('applicantEmail', userData.email || '');
-      formDataToSend.append('yearsOfExperience', formData.yearsOfExperience);
-      formDataToSend.append('isCurrentlyWorking', formData.isCurrentlyWorking.toString());
-      formDataToSend.append('currentCompany', formData.currentCompany || '');
-      formDataToSend.append('currentDesignation', formData.currentDesignation || '');
-      
       // Handle resume file - must use uploaded resume from profile
       if (uploadedResumes.length === 0) {
         setToast({ message: 'Please upload a resume on your profile first.', type: 'error' });
@@ -85,12 +84,28 @@ const ApplyJobPage: React.FC = () => {
         return;
       }
 
-      // Send resume file name - backend will fetch the actual file from user's profile
-      formDataToSend.append('resumeFileName', selectedResume.name);
+      // Create JSON payload - backend will fetch the resume file from storage using resumeFileName
+      // The resume should already be uploaded to backend when user uploaded it on profile page
+      // Frontend stores original fileName in resumeFileName field (required)
+      // storageFileName is optional and used for direct access if available
+      const applicationData: any = {
+        jobId: jobId,
+        applicantName: formData.name,
+        applicantEmail: userData.email || '',
+        yearsOfExperience: formData.yearsOfExperience,
+        isCurrentlyWorking: formData.isCurrentlyWorking,
+        currentCompany: formData.currentCompany || '',
+        currentDesignation: formData.currentDesignation || '',
+        resumeFileName: selectedResume.name, // Original filename (required)
+        storageFileName: selectedResume.storageFileName // Sanitized filename for direct access (optional)
+      };
 
       const response = await fetch('http://localhost:5000/api/applications', {
         method: 'POST',
-        body: formDataToSend
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(applicationData)
       });
 
       const data = await response.json();
@@ -117,13 +132,16 @@ const ApplyJobPage: React.FC = () => {
   };
 
   return (
-    <div className={`apply-job-page-wrapper theme-${theme}`}>
+    <div className="apply-job-page-wrapper min-h-screen bg-slate-50 dark:bg-slate-950 relative transition-colors duration-300">
+      <Background />
       {/* Header */}
       <header className="apply-job-header-wrapper">
         <div className="apply-job-header">
           <div className="header-left">
-            <button className="cancel-link" onClick={() => navigate('/job-listings')}>
-              Cancel
+            <button className="cancel-link" onClick={() => navigate('/job-listings')} title="Home">
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
             </button>
           </div>
           <div className="header-center">
@@ -245,6 +263,9 @@ const ApplyJobPage: React.FC = () => {
                   </div>
                   <p className="resume-note">
                     💡 To update your resume, go to your <button type="button" className="link-button" onClick={() => navigate('/upload')}>profile</button>
+                  </p>
+                  <p className="resume-note" style={{ marginTop: '8px', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                    Note: Make sure your resume is uploaded on your profile page. The backend will fetch it using the filename.
                   </p>
                 </div>
               ) : (
