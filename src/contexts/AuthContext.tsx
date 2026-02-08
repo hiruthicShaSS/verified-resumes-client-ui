@@ -20,7 +20,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const checkEmailVerification = async (userEmail: string) => {
     try {
       // Check email verification status from backend
-      const response = await fetch(`http://localhost:5000/api/users/me?email=${encodeURIComponent(userEmail)}`, {
+      const response = await fetch(`https://verified-resumes-be-production.up.railway.app/api/users/me?email=${encodeURIComponent(userEmail)}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

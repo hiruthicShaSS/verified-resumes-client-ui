@@ -103,7 +103,7 @@ const PreviousCompanyVerificationPage: React.FC = () => {
       // Fetch from current company verifications endpoint by company name
       // This shows verifications where applicants filled in current company name during application
       const response = await fetch(
-        `http://localhost:5000/api/current-company-verifications/by-company-name/${encodeURIComponent(companyName)}?status=${statusParam}`,
+        `https://verified-resumes-be-production.up.railway.app/api/current-company-verifications/by-company-name/${encodeURIComponent(companyName)}?status=${statusParam}`,
         {
           method: 'GET',
           headers: {
@@ -173,7 +173,7 @@ const PreviousCompanyVerificationPage: React.FC = () => {
       
       // Use current company verification endpoint
       const response = await fetch(
-        `http://localhost:5000/api/current-company-verifications/${verificationId}/verify`,
+        `https://verified-resumes-be-production.up.railway.app/api/current-company-verifications/${verificationId}/verify`,
         {
           method: 'POST',
           headers: {
@@ -245,7 +245,7 @@ const PreviousCompanyVerificationPage: React.FC = () => {
         // Fetch resume info and download URL using the new endpoint
         // Include userEmail query parameter to help backend locate the file
         const response = await fetch(
-          `http://localhost:5000/api/resumes/${encodedFileName}?userEmail=${encodedEmail}`,
+          `https://verified-resumes-be-production.up.railway.app/api/resumes/${encodedFileName}?userEmail=${encodedEmail}`,
           {
             method: 'GET',
             headers: {
@@ -723,7 +723,7 @@ const PreviousCompanyVerificationPage: React.FC = () => {
                               try {
                                 const userData = JSON.parse(localStorage.getItem('userData') || '{}');
                                 const response = await fetch(
-                                  `http://localhost:5000/api/current-company-verifications/${verification._id}/comments`,
+                                  `https://verified-resumes-be-production.up.railway.app/api/current-company-verifications/${verification._id}/comments`,
                                   {
                                     method: 'POST',
                                     headers: {

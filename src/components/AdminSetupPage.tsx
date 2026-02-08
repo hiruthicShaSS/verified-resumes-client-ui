@@ -91,7 +91,7 @@ const AdminSetupPage: React.FC = () => {
     setToast(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/setup/admin', {
+      const response = await fetch('https://verified-resumes-be-production.up.railway.app/api/setup/admin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

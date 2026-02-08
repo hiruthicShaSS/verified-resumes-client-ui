@@ -43,7 +43,7 @@ export const useUserRole = (): UserRoleInfo => {
         
         // Call backend API to get user role
         const response = await fetch(
-          `http://localhost:5000/api/users/me/role?email=${encodeURIComponent(userEmail)}`,
+          `https://verified-resumes-be-production.up.railway.app/api/users/me/role?email=${encodeURIComponent(userEmail)}`,
           {
             method: 'GET',
             headers: {

@@ -24,7 +24,7 @@ export const LoginCard: React.FC<LoginCardProps> = ({ onLogin }) => {
       
       if (user.email) {
         try {
-          const response = await fetch(`http://localhost:5000/api/users/me?email=${encodeURIComponent(user.email)}`, {
+          const response = await fetch(`https://verified-resumes-be-production.up.railway.app/api/users/me?email=${encodeURIComponent(user.email)}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',

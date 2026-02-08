@@ -119,7 +119,7 @@ const ApplicantsPage: React.FC = () => {
       // If jobId is provided, first verify the job belongs to the user's company
       if (jobId) {
         try {
-          const jobResponse = await fetch(`http://localhost:5000/api/jobs/${jobId}`, {
+          const jobResponse = await fetch(`https://verified-resumes-be-production.up.railway.app/api/jobs/${jobId}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
@@ -154,10 +154,10 @@ const ApplicantsPage: React.FC = () => {
       
       if (jobId) {
         // Get applications for a specific job - send both companyName and userEmail for authorization
-        url = `http://localhost:5000/api/applications/job/${jobId}?companyName=${encodeURIComponent(companyName)}&userEmail=${encodeURIComponent(user.email)}`;
+        url = `https://verified-resumes-be-production.up.railway.app/api/applications/job/${jobId}?companyName=${encodeURIComponent(companyName)}&userEmail=${encodeURIComponent(user.email)}`;
       } else {
         // Get all applications for the company - send both companyName and userEmail for authorization
-        url = `http://localhost:5000/api/applications/company/${encodeURIComponent(companyName)}?userEmail=${encodeURIComponent(user.email)}`;
+        url = `https://verified-resumes-be-production.up.railway.app/api/applications/company/${encodeURIComponent(companyName)}?userEmail=${encodeURIComponent(user.email)}`;
       }
 
       const response = await fetch(url);
@@ -217,7 +217,7 @@ const ApplicantsPage: React.FC = () => {
         // Fetch resume info and download URL using the new endpoint
         // Include userEmail query parameter to help backend locate the file
         const response = await fetch(
-          `http://localhost:5000/api/resumes/${encodedFileName}?userEmail=${encodedEmail}`,
+          `https://verified-resumes-be-production.up.railway.app/api/resumes/${encodedFileName}?userEmail=${encodedEmail}`,
           {
             method: 'GET',
             headers: {
@@ -296,7 +296,7 @@ const ApplicantsPage: React.FC = () => {
     if (!user?.email) return;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/applications/${applicationId}/status`, {
+      const response = await fetch(`https://verified-resumes-be-production.up.railway.app/api/applications/${applicationId}/status`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
@@ -328,7 +328,7 @@ const ApplicantsPage: React.FC = () => {
     setIsAddingComment(prev => ({ ...prev, [applicationId]: true }));
     try {
       const userData = JSON.parse(localStorage.getItem('userData') || '{}');
-      const response = await fetch(`http://localhost:5000/api/applications/${applicationId}/comments`, {
+      const response = await fetch(`https://verified-resumes-be-production.up.railway.app/api/applications/${applicationId}/comments`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

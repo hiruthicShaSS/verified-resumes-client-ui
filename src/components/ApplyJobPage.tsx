@@ -100,7 +100,7 @@ const ApplyJobPage: React.FC = () => {
         storageFileName: selectedResume.storageFileName // Sanitized filename for direct access (optional)
       };
 
-      const response = await fetch('http://localhost:5000/api/applications', {
+      const response = await fetch('https://verified-resumes-be-production.up.railway.app/api/applications', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

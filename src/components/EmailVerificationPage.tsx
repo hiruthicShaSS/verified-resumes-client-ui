@@ -131,7 +131,7 @@ const EmailVerificationPage: React.FC = () => {
     setToast(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/verify-email', {
+      const response = await fetch('https://verified-resumes-be-production.up.railway.app/api/auth/verify-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -193,7 +193,7 @@ const EmailVerificationPage: React.FC = () => {
     setToast(null);
 
     try {
-      const response = await fetch('http://localhost:5000/api/auth/resend-verification', {
+      const response = await fetch('https://verified-resumes-be-production.up.railway.app/api/auth/resend-verification', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

@@ -122,7 +122,7 @@ const UploadPage: React.FC = () => {
           formData.append('resumeFileName', file.name);
           formData.append('userEmail', user?.email || '');
 
-          const response = await fetch('http://localhost:5000/api/resumes/upload', {
+          const response = await fetch('https://verified-resumes-be-production.up.railway.app/api/resumes/upload', {
             method: 'POST',
             body: formData
           });

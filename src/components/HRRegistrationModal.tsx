@@ -169,7 +169,7 @@ const HRRegistrationModal: React.FC<HRRegistrationModalProps> = ({ onClose }) =>
 
           // Try to send via backend API (may fail if user doesn't exist, but that's OK)
           try {
-            const response = await fetch('http://localhost:5000/api/auth/resend-verification', {
+            const response = await fetch('https://verified-resumes-be-production.up.railway.app/api/auth/resend-verification', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -241,7 +241,7 @@ const HRRegistrationModal: React.FC<HRRegistrationModalProps> = ({ onClose }) =>
       const emailLower = pair.email.trim().toLowerCase();
       
       // Verify code via backend API
-      const response = await fetch('http://localhost:5000/api/auth/verify-email', {
+      const response = await fetch('https://verified-resumes-be-production.up.railway.app/api/auth/verify-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -349,7 +349,7 @@ const HRRegistrationModal: React.FC<HRRegistrationModalProps> = ({ onClose }) =>
 
       // Try to send via backend API
       try {
-        const response = await fetch('http://localhost:5000/api/auth/resend-verification', {
+        const response = await fetch('https://verified-resumes-be-production.up.railway.app/api/auth/resend-verification', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
